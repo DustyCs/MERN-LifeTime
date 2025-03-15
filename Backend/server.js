@@ -30,8 +30,8 @@ app.use("/api/schedules", scheduleRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/health", healthRoutes);
 app.use("/api/performance", performanceRoutes);
-app.use("/api/reviews", reviewRoutes);
-app.use("/api/life_overview", lifeOverviewRoutes);
+app.use("/api/review", reviewRoutes);
+app.use("/api/life-overview", lifeOverviewRoutes);
 
 
 // Connect to MongoDB

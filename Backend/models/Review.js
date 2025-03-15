@@ -7,8 +7,13 @@ const ReviewSchema = new mongoose.Schema({
     required: true,
   },
   month: { type: String, required: true },
-  insights: { type: String },
-  suggestions: { type: String },
+  year: { type: Number, required: true },
+  analysis: {
+    health: { type: String },
+    exercise: { type: String },
+    hobby: { type: String },
+    entertainment: { type: String },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

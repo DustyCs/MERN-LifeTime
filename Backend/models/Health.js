@@ -9,7 +9,7 @@ const HealthSchema = new mongoose.Schema({
   weight: { type: Number, required: true },
   height: { type: Number, required: true },
   bmi: { type: Number, required: true },
-  riskOfSickness: { type: Number, required: true },
+  riskOfSickness: { type: String, enum: ["Low", "Medium", "High"], required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
