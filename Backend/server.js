@@ -3,6 +3,13 @@ require('dotenv').config();
 const connect = require('./connect');
 const express = require('express');
 const cors = require('cors');
+const authRoutes = require("./routes/authRoutes");
+const scheduleRoutes = require("./routes/scheduleRoutes");
+const activityRoutes = require("./routes/activityRoutes");
+const healthRoutes = require("./routes/healthRoutes");
+const performanceRoutes = require("./routes/performanceRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const lifeOverviewRoutes = require("./routes/lifeOverviewRoutes");
 
 const mongoose = require('mongoose');
 
@@ -12,10 +19,20 @@ const PORT = 5000;
 
 app.use(express.json());
 
-// Import Routes
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/user", require("./routes/userRoutes"));
-app.use("/api/schedules", require("./routes/scheduleRoutes"));
+// connect DB
+
+// connect.connectDB();
+
+// API
+// app.use("/api/user", require("./routes/userRoutes"));
+app.use("/api/auth", authRoutes);
+app.use("/api/schedules", scheduleRoutes);
+app.use("/api/activities", activityRoutes);
+app.use("/api/health", healthRoutes);
+app.use("/api/performance", performanceRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/life_overview", lifeOverviewRoutes);
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
