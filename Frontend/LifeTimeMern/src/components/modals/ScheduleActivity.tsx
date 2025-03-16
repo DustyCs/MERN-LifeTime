@@ -16,14 +16,20 @@ export const ScheduleModal = ({ isOpen, onClose, onSuccess }: ModalProps) => {
   const handleSubmit = async () => {
     try {
       const formattedDate = new Date(date);
-      await API.post("/schedules", { title, description, date: formattedDate, category });
+      const parsedDate = new Date(date);
+      await API.post("/schedules", { 
+      title, 
+      description, 
+      date: parsedDate.toISOString(), // Ensure proper format
+      category 
+    });
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Error creating schedule:", error);
     }
   };
-  
+
   if (!isOpen) return null;
 
   return (

@@ -47,14 +47,25 @@ const Homepage = () => {
 
   const fetchSchedule = async () => {
     try {
-      const response = await API.get("/schedules/current-week"); // Fetch grouped schedules
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1; // Ensure month is in numeric format
+  
+      const response = await API.get(`/schedules?year=${year}&month=${month}`); // Use numeric month
+  
+      if (!response.data || !response.data.length) {
+        console.warn("No schedule data found for this month.");
+        setSchedule([]);
+        return;
+      }
+  
       const schedules = response.data;
   
-      // Extract events from schedules
+      // Extract events and attach formatted date
       const allEvents = schedules.flatMap(schedule =>
         schedule.events.map(event => ({
           ...event,
-          date: `${schedule.year}-${schedule.month.toString().padStart(2, "0")}-${event.day.toString().padStart(2, "0")}`, // Format date
+          date: `${schedule.year}-${String(schedule.month).padStart(2, "0")}-${String(event.day).padStart(2, "0")}`,
         }))
       );
   

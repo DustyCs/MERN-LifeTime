@@ -1,7 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const Schedule = require("../models/Schedule");
-
+const mongoose = require("mongoose");
 const router = express.Router();
 
 // // Create schedule
@@ -155,41 +155,74 @@ router.post("/", authMiddleware, async (req, res) => {
 
 // Get Current Week Schedule
 router.get("/current-week", authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const today = new Date();
+    try {
+        const userId = req.user.userId; // Ensure userId is extracted correctly
+        const objectIdUserId = new mongoose.Types.ObjectId(userId); // Convert to ObjectId
 
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay() + 1);
-    startOfWeek.setHours(0, 0, 0, 0);
+        const today = new Date();
+        const startOfWeek = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay() + 1));
+        startOfWeek.setUTCHours(0, 0, 0, 0);
 
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() - today.getDay() + 7);
-    endOfWeek.setHours(23, 59, 59, 999);
+        const endOfWeek = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay() + 7));
+        endOfWeek.setUTCHours(23, 59, 59, 999);
 
-    const schedules = await Schedule.find({
-      userId,
-      date: { $gte: startOfWeek, $lte: endOfWeek }
-    });
+        console.log("Start of Week (UTC):", startOfWeek);
+        console.log("End of Week (UTC):", endOfWeek);
 
-    res.json(schedules || []);
-  } catch (error) {
-    console.error("Get Current Week Schedules Error:", error.message);
-    res.status(500).json({ msg: "Server Error - attempting to get current week" });
-  }
+        // ✅ Fetch all schedules that use the NEW FORMAT (Fix userId filtering)
+        const allSchedules = await Schedule.find({ userId: objectIdUserId });
+
+        console.log("All Schedules for User (filtered by userId):", JSON.stringify(allSchedules, null, 2)); // Debug log
+
+        // ✅ Find schedules with events within the week
+        const schedules = await Schedule.find({
+            userId: objectIdUserId, // 🛠 Fix userId type issue
+            "events.date": {
+                $gte: startOfWeek,
+                $lte: endOfWeek
+            }
+        });
+
+        console.log("Matching Schedules:", JSON.stringify(schedules, null, 2));
+
+        // ✅ Flatten schedules into an event list
+        const events = schedules.flatMap(schedule =>
+            schedule.events.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate >= startOfWeek && eventDate <= endOfWeek;
+            })
+        );
+
+        console.log("Final Filtered Events:", JSON.stringify(events, null, 2));
+
+        res.json(events.length > 0 ? events : []);
+    } catch (error) {
+        console.error("Get Current Week Schedules Error:", error.message);
+        res.status(500).json({ msg: "Server Error - attempting to get current week" });
+    }
 });
 
 // Get Full Schedule
 router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const schedules = await Schedule.find({ userId });
-    res.json(schedules || []);
-  } catch (error) {
-    console.error("Get Full Schedule Error:", error.message);
-    res.status(500).json({ msg: "Server Error - attempting to get full schedule" });
-  }
-});
+    try {
+      const userId = req.user.id;
+      const schedules = await Schedule.find({ userId });
+  
+      // Extract all events from all schedules
+      const allEvents = schedules.flatMap(schedule =>
+        schedule.events.map(event => ({
+          ...event,
+          year: schedule.year,
+          month: schedule.month
+        }))
+      );
+  
+      res.json(allEvents || []);
+    } catch (error) {
+      console.error("Get Full Schedule Error:", error.message);
+      res.status(500).json({ msg: "Server Error - attempting to get full schedule" });
+    }
+  });
 
 // Update Schedule
 router.put("/:id", authMiddleware, async (req, res) => {
@@ -215,6 +248,38 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+// Update Specific Event Inside a Schedule
+router.put("/:id/:eventId", authMiddleware, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const scheduleId = req.params.id.trim();
+      const eventId = req.params.eventId.trim();
+      const { title, description, category, date } = req.body;
+  
+      const updatedSchedule = await Schedule.findOneAndUpdate(
+        { _id: scheduleId, userId, "events._id": eventId },
+        {
+          $set: {
+            "events.$.title": title,
+            "events.$.description": description,
+            "events.$.category": category,
+            "events.$.date": date
+          }
+        },
+        { new: true }
+      );
+  
+      if (!updatedSchedule) {
+        return res.status(404).json({ msg: "Event not found or unauthorized" });
+      }
+  
+      res.json(updatedSchedule);
+    } catch (error) {
+      console.error("Update Event Error:", error.message);
+      res.status(500).json({ msg: "Server Error - attempting to update event" });
+    }
+  });
+
 // Delete Schedule
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
@@ -233,5 +298,29 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to delete schedule" });
   }
 });
+
+// Delete Specific Event Inside a Schedule
+router.delete("/:id/:eventId", authMiddleware, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const scheduleId = req.params.id.trim();
+      const eventId = req.params.eventId.trim();
+  
+      const updatedSchedule = await Schedule.findOneAndUpdate(
+        { _id: scheduleId, userId },
+        { $pull: { events: { _id: eventId } } }, // Remove only the matching event
+        { new: true }
+      );
+  
+      if (!updatedSchedule) {
+        return res.status(404).json({ msg: "Event not found or unauthorized" });
+      }
+  
+      res.json({ msg: "Event deleted", updatedSchedule });
+    } catch (error) {
+      console.error("Delete Event Error:", error.message);
+      res.status(500).json({ msg: "Server Error - attempting to delete event" });
+    }
+  });
 
 module.exports = router;
