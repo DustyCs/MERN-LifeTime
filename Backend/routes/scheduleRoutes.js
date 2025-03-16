@@ -4,66 +4,6 @@ const Schedule = require("../models/Schedule");
 const mongoose = require("mongoose");
 const router = express.Router();
 
-// // Create schedule
-// router.post('/', authMiddleware, async (req, res) => {
-//     try {
-//         console.log("Received Request Body:", req.body); // Debugging log
-
-//         const { title, description, date, category } = req.body;
-
-//         if (!title || !date || !category) {
-//             return res.status(400).json({ msg: "Missing required fields: title, date, or category" });
-//         }
-
-//         // Ensure `req.user` exists
-//         if (!req.user || !req.user.userId) {
-//             return res.status(401).json({ msg: "Unauthorized - No user ID found" });
-//         }
-
-//         const userId = req.user.userId; // ✅ Correct extraction
-//         console.log("User ID from token:", userId);
-
-//         // Parse the date
-//         const parsedDate = new Date(date);
-//         const year = parsedDate.getFullYear();
-//         const month = parsedDate.getMonth() + 1; // JS months are 0-based
-//         const day = parsedDate.getDate();
-
-//         console.log("Parsed Date:", { year, month, day });
-
-//         // 🔍 Check if the schedule exists
-//         let schedule = await Schedule.findOne({ userId, year, month });
-
-//         if (!schedule) {
-//             console.log("No existing schedule found, creating a new one...");
-//             schedule = new Schedule({
-//                 userId,
-//                 month,
-//                 year,
-//                 events: [] // ✅ Ensure events array exists
-//             });
-//         }
-
-//         // Ensure `events` array exists before pushing
-//         if (!Array.isArray(schedule.events)) {
-//             schedule.events = [];
-//         }
-
-//         // Add the new event
-//         schedule.events.push({ day, title, description, category });
-
-//         // Save the updated schedule
-//         await schedule.save();
-
-//         console.log("Schedule saved successfully:", schedule);
-//         res.json(schedule);
-//     } 
-//     catch (error) {
-//         console.error("Error creating schedule:", error);
-//         res.status(500).json({ msg: `Server Error - attempting to create schedule - ${error.message}` });
-//     }
-// });
-
 // Create/Update Schedule
 router.post("/", authMiddleware, async (req, res) => {
     try {
@@ -130,72 +70,59 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 });
 
-// Debug
-// router.post("/", async (req, res) => {
-//     console.log("Received Request Body:", req.body); // Debugging line
-
-//     try {
-//         const { title, description, date, category } = req.body;
-
-//         if (!title || !date || !category) {
-//             return res.status(400).json({ msg: "Missing required fields: title, date, or category" });
-//         }
-
-//         console.log("Extracted Fields:", { title, description, date, category });
-
-//         // Dummy response to confirm the request is working
-//         res.json({ msg: "Test route received data successfully!", data: { title, description, date, category } });
-
-//         // In the actual implementation, you'd continue with database logic...
-//     } catch (error) {
-//         console.error("Error creating schedule:", error);
-//         res.status(500).json({ msg: "Server Error - attempting to create schedule - " + error });
-//     }
-// });
-
 // Get Current Week Schedule
 router.get("/current-week", authMiddleware, async (req, res) => {
     try {
-        const userId = req.user.userId; // Ensure userId is extracted correctly
-        const objectIdUserId = new mongoose.Types.ObjectId(userId); // Convert to ObjectId
+        const userId = req.user.userId; 
+        const objectIdUserId = new mongoose.Types.ObjectId(userId);
 
         const today = new Date();
         const startOfWeek = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay() + 1));
         startOfWeek.setUTCHours(0, 0, 0, 0);
-
         const endOfWeek = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay() + 7));
         endOfWeek.setUTCHours(23, 59, 59, 999);
 
         console.log("Start of Week (UTC):", startOfWeek);
         console.log("End of Week (UTC):", endOfWeek);
 
-        // ✅ Fetch all schedules that use the NEW FORMAT (Fix userId filtering)
-        const allSchedules = await Schedule.find({ userId: objectIdUserId });
-
-        console.log("All Schedules for User (filtered by userId):", JSON.stringify(allSchedules, null, 2)); // Debug log
-
-        // ✅ Find schedules with events within the week
-        const schedules = await Schedule.find({
-            userId: objectIdUserId, // 🛠 Fix userId type issue
-            "events.date": {
-                $gte: startOfWeek,
-                $lte: endOfWeek
-            }
+        // Fetch schedules in NEW format (individual documents)
+        const newFormatSchedules = await Schedule.find({
+            userId: objectIdUserId,
+            date: { $gte: startOfWeek, $lte: endOfWeek }
         });
 
-        console.log("Matching Schedules:", JSON.stringify(schedules, null, 2));
+        // Fetch schedules in OLD format (events array)
+        const oldFormatSchedules = await Schedule.find({
+            userId: objectIdUserId,
+            "events.date": { $gte: startOfWeek, $lte: endOfWeek }
+        });
 
-        // ✅ Flatten schedules into an event list
-        const events = schedules.flatMap(schedule =>
+        console.log("New Format Schedules:", JSON.stringify(newFormatSchedules, null, 2));
+        console.log("Old Format Schedules:", JSON.stringify(oldFormatSchedules, null, 2));
+
+        // Extract all events from old format
+        const oldFormatEvents = oldFormatSchedules.flatMap(schedule =>
             schedule.events.filter(event => {
                 const eventDate = new Date(event.date);
                 return eventDate >= startOfWeek && eventDate <= endOfWeek;
             })
         );
 
-        console.log("Final Filtered Events:", JSON.stringify(events, null, 2));
+        // Merge both formats into a single response
+        const allEvents = [
+            ...newFormatSchedules.map(sch => ({
+                _id: sch._id,
+                title: sch.title,
+                description: sch.description,
+                date: sch.date,
+                category: sch.category
+            })),
+            ...oldFormatEvents
+        ];
 
-        res.json(events.length > 0 ? events : []);
+        console.log("Final Filtered Events:", JSON.stringify(allEvents, null, 2));
+
+        res.json(allEvents);
     } catch (error) {
         console.error("Get Current Week Schedules Error:", error.message);
         res.status(500).json({ msg: "Server Error - attempting to get current week" });
@@ -205,24 +132,46 @@ router.get("/current-week", authMiddleware, async (req, res) => {
 // Get Full Schedule
 router.get("/", authMiddleware, async (req, res) => {
     try {
-      const userId = req.user.id;
-      const schedules = await Schedule.find({ userId });
-  
-      // Extract all events from all schedules
-      const allEvents = schedules.flatMap(schedule =>
-        schedule.events.map(event => ({
-          ...event,
-          year: schedule.year,
-          month: schedule.month
-        }))
-      );
-  
-      res.json(allEvents || []);
+        const userId = req.user.userId;
+        const objectIdUserId = new mongoose.Types.ObjectId(userId);
+
+        // Fetch all schedules (new format)
+        const newFormatSchedules = await Schedule.find({ userId: objectIdUserId });
+
+        // Fetch all schedules (old format)
+        const oldFormatSchedules = await Schedule.find({ userId: objectIdUserId, events: { $exists: true, $not: { $size: 0 } } });
+
+        console.log("New Format Schedules:", JSON.stringify(newFormatSchedules, null, 2));
+        console.log("Old Format Schedules:", JSON.stringify(oldFormatSchedules, null, 2));
+
+        // Extract all events from old format
+        const oldFormatEvents = oldFormatSchedules.flatMap(schedule =>
+            schedule.events.map(event => ({
+                ...event,
+                year: schedule.year,
+                month: schedule.month
+            }))
+        );
+
+        // Merge both formats
+        const allEvents = [
+            ...newFormatSchedules.map(sch => ({
+                _id: sch._id,
+                title: sch.title,
+                description: sch.description,
+                date: sch.date,
+                category: sch.category
+            })),
+            ...oldFormatEvents
+        ];
+
+        res.json(allEvents);
     } catch (error) {
-      console.error("Get Full Schedule Error:", error.message);
-      res.status(500).json({ msg: "Server Error - attempting to get full schedule" });
+        console.error("Get Full Schedule Error:", error.message);
+        res.status(500).json({ msg: "Server Error - attempting to get full schedule" });
     }
-  });
+});
+
 
 // Update Schedule
 router.put("/:id", authMiddleware, async (req, res) => {

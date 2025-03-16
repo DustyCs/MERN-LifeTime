@@ -44,37 +44,44 @@ const Homepage = () => {
     fetchHealthData();
     fetchAiAnalysis();
   }, []);
-
   const fetchSchedule = async () => {
     try {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1; // Ensure month is in numeric format
-  
-      const response = await API.get(`/schedules?year=${year}&month=${month}`); // Use numeric month
-  
-      if (!response.data || !response.data.length) {
-        console.warn("No schedule data found for this month.");
-        setSchedule([]);
-        return;
-      }
-  
-      const schedules = response.data;
-  
-      // Extract events and attach formatted date
-      const allEvents = schedules.flatMap(schedule =>
-        schedule.events.map(event => ({
-          ...event,
-          date: `${schedule.year}-${String(schedule.month).padStart(2, "0")}-${String(event.day).padStart(2, "0")}`,
-        }))
-      );
-  
-      setSchedule(allEvents);
+        const response = await API.get("/schedules/current-week");
+
+        if (!response.data || !response.data.length) {
+            console.warn("No schedule data found for the current week.");
+            setSchedule([]);
+            return;
+        }
+
+        // Extract only valid events (skip the first object if it only contains `_id`)
+        const schedules = response.data.filter(event => event.title); 
+
+        // Process events: ensure date formatting and validity
+        const allEvents = schedules.map(event => {
+            if (!event.date) {
+                console.warn("Skipping event with missing date:", event);
+                return null; // Ignore invalid events
+            }
+
+            const parsedDate = new Date(event.date);
+            if (isNaN(parsedDate.getTime())) {
+                console.warn("Skipping invalid date:", event.date);
+                return null; // Ignore events with invalid dates
+            }
+
+            return {
+                ...event,
+                date: parsedDate.toISOString().split("T")[0] // Ensure YYYY-MM-DD format
+            };
+        }).filter(event => event !== null); // Remove null values
+
+        setSchedule(allEvents);
     } catch (error) {
-      console.error("Error fetching schedule:", error);
-      setSchedule([]);
+        console.error("Error fetching schedule:", error);
+        setSchedule([]);
     }
-  };
+};
 
   const fetchActivities = async () => {
     try {
