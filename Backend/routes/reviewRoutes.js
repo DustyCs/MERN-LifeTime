@@ -25,7 +25,7 @@ router.get("/:month", authMiddleware, async (req, res) => {
   }
 });
 
-// Create/Update Monthly Review
+// Create/Update Monthly
 
 router.post("/", authMiddleware, async (req, res) => {
   try {

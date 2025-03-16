@@ -7,6 +7,7 @@ import "chart.js/auto";
 import API from "../api/api"; // Use the API instance
 import { ScheduleModal } from "../components/modals/ScheduleActivity";
 import { ActivityModal } from "../components/modals/ScheduleActivity";
+import HealthModal from "../components/modals/Health";
 
 interface Schedule {
   _id: string;
@@ -37,6 +38,7 @@ const Homepage = () => {
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [isActivityModalOpen, setActivityModalOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchSchedule();
@@ -101,19 +103,33 @@ const Homepage = () => {
   const fetchHealthData = async () => {
     try {
       const response = await API.get("/health");
-      setHealthData(response.data);
+  
+      if (!response.data || response.data.msg) {
+        console.warn("No health data available, setting default values.");
+        setHealthData({
+          previous: 0,
+          current: 0,
+        });
+      } else {
+        setHealthData({
+          previous: response.data.previous || 0,
+          current: response.data.current || 0,
+        });
+      }
     } catch (error) {
       console.error("Error fetching health data:", error);
+      setHealthData({ previous: 0, current: 0 });
     }
   };
 
   const fetchAiAnalysis = async () => {
     try {
-      const month = new Date().toLocaleString("default", { month: "long" });
+      const month = new Date().toLocaleString("default", { month: "long" }).toLowerCase();
       const response = await API.get(`/review/${month}`);
+      console.log("AI Analysis API Response:", response.data);
       setAiAnalysis(response.data.analysis);
     } catch (error) {
-      console.error("Error fetching AI analysis:", error);
+      console.error("Error fetching AI analysis:", error.response ? error.response.data : error);
     }
   };
 
@@ -171,23 +187,43 @@ const Homepage = () => {
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h1 className="text-xl font-bold">Health Status Comparison</h1>
-        {healthData && (
-          <Line
-            data={{
-              labels: ["Previous Day", "Today"],
-              datasets: [
-                {
-                  label: "Health Status",
-                  data: [healthData.previous, healthData.current],
-                  backgroundColor: "rgba(75, 192, 192, 0.2)",
-                  borderColor: "rgba(75, 192, 192, 1)",
-                  borderWidth: 1,
-                },
-              ],
-            }}
-          />
+
+        {console.log("Health Data Debug:", healthData)}
+
+        {healthData && (healthData.previous !== undefined || healthData.current !== undefined) ? (
+            <div className="h-60">
+                <Line
+                    data={{
+                        labels: ["Previous Day", "Today"],
+                        datasets: [
+                        {
+                            label: "Health Status",
+                            data: [healthData.previous || 0, healthData.current || 0], // Ensure it has data
+                            backgroundColor: "rgba(75, 192, 192, 0.2)",
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            borderWidth: 1,
+                        },
+                        ],
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                        y: { beginAtZero: true },
+                        },
+                    }}
+                />
+            </div>
+        ) : (
+            <p className="text-gray-500 mt-2">No health data available</p>
         )}
-      </motion.div>
+
+        <button className="mt-4 p-2 bg-blue-500 text-white rounded-md" onClick={() => setShowModal(true)}>
+            Log Health Status
+        </button>
+
+        {showModal && <HealthModal onClose={() => setShowModal(false)} onSave={fetchHealthData} />}
+     </motion.div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h1 className="text-xl font-bold">AI Insights</h1>
