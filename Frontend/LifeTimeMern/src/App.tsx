@@ -4,13 +4,16 @@ import './App.css'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout';
 import Home from './pages/Home';
+import Schedule from './pages/Schedule';
+import AuthPage from './pages/Access';
 
 function App() {
   return (
     <Routes>
       <Route element={<Layout/>}>
         <Route path="/" element={<Home />} />
-        <Route path="/schedule" element={<h1>Home</h1>}  />
+        <Route path="/access" element={<AuthPage />}  />
+        <Route path="/schedule" element={<Schedule />} />
         <Route path="/activity_list" element={<h1>Home</h1>} />
         <Route path="/performance" element={<h1>Home</h1>} />
         <Route path="/monthly_review" element={<h1>Home</h1>} />

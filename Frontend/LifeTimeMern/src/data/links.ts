@@ -1,3 +1,9 @@
+export type NavLink = {
+    name: string;
+    path: string;
+    onClick?: () => void;
+};
+
 export const Links = [
     {
         name: "Home",
