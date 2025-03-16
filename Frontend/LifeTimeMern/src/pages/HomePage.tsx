@@ -102,23 +102,28 @@ const Homepage = () => {
 
   const fetchHealthData = async () => {
     try {
-      const response = await API.get("/health");
+      const response = await API.get("/health/recent");
   
-      if (!response.data || response.data.msg) {
+      if (!response.data || response.data.length === 0) {
         console.warn("No health data available, setting default values.");
-        setHealthData({
-          previous: 0,
-          current: 0,
-        });
-      } else {
-        setHealthData({
-          previous: response.data.previous || 0,
-          current: response.data.current || 0,
-        });
+        setHealthData({ previous: 0, current: 0, previousWeight: 0, currentWeight: 0 });
+        return;
       }
+  
+      // Extract the most recent health record
+      const latestHealthRecord = response.data[0];
+  
+      setHealthData({
+        previous: latestHealthRecord.bmi ?? 0, // Use BMI
+        current: latestHealthRecord.bmi ?? 0, 
+        previousWeight: latestHealthRecord.weight ?? 0, // Use Weight
+        currentWeight: latestHealthRecord.weight ?? 0,
+      });
+  
+      console.log("Updated Health Data:", latestHealthRecord);
     } catch (error) {
       console.error("Error fetching health data:", error);
-      setHealthData({ previous: 0, current: 0 });
+      setHealthData({ previous: 0, current: 0, previousWeight: 0, currentWeight: 0 });
     }
   };
 
@@ -197,10 +202,17 @@ const Homepage = () => {
                         labels: ["Previous Day", "Today"],
                         datasets: [
                         {
-                            label: "Health Status",
-                            data: [healthData.previous || 0, healthData.current || 0], // Ensure it has data
+                            label: "BMI",
+                            data: [healthData.previous ?? 0, healthData.current ?? 0],
                             backgroundColor: "rgba(75, 192, 192, 0.2)",
                             borderColor: "rgba(75, 192, 192, 1)",
+                            borderWidth: 1,
+                        },
+                        {
+                            label: "Weight (kg)",
+                            data: [healthData.previousWeight ?? 0, healthData.currentWeight ?? 0],
+                            backgroundColor: "rgba(255, 99, 132, 0.2)",
+                            borderColor: "rgba(255, 99, 132, 1)",
                             borderWidth: 1,
                         },
                         ],

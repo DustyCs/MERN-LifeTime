@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import API from "../../api/api";
 
 const HealthModal = ({ onClose, onSave }) => {
@@ -23,25 +23,34 @@ const HealthModal = ({ onClose, onSave }) => {
   const handleInputChange = (setter) => (e) => {
     const value = parseFloat(e.target.value) || "";
     setter(value);
+  };
 
+  // ✅ Recalculate BMI when weight or height changes
+  useEffect(() => {
     if (weight && height) {
       const calculatedBmi = calculateBMI(weight, height);
       setBmi(calculatedBmi);
       setRisk(calculatedBmi ? determineRisk(calculatedBmi) : "");
+    } else {
+      setBmi(null);
+      setRisk("");
     }
-  };
+  }, [weight, height]); // Depend on `weight` and `height`
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!bmi) return;
-
+  
+    const payload = { weight, height, bmi, riskOfSickness: risk };
+    console.log("Sending payload:", payload); // 🔍 Check the exact data sent
+  
     try {
-      await API.post("/health", { weight, height, bmi, riskOfSickness: risk });
-
+      await API.post("/health", payload, { headers: { "Content-Type": "application/json" } });
       onSave(); // Refresh data
       onClose();
     } catch (error) {
       console.error("Error logging health data:", error);
+      console.error("Error response:", error.response?.data); // Log backend error message
     }
   };
 
