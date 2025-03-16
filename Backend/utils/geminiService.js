@@ -47,5 +47,27 @@ async function generateReview(month, year, activities, healthData) {
         return null;
         }
     }
+
+async function generatePrompt(prompt){
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: "v1" });
+  
+        const response = await Promise.race([
+            model.generateContent({ contents: [{ parts: [{ text: prompt }] }] }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("AI Timeout")), 10000)) // 10 sec timeout
+        ]);
+        console.log("Received AI response:", response);
+
+        let aiData = response.response.candidates[0].content.parts[0].text;
     
-module.exports = { generateReview };
+        // **Fix: Remove unwanted markdown formatting**
+        aiData = aiData.replace(/```json|```/g, "").trim();
+    
+        return aiData;
+        } catch (error) {
+        console.error("Gemini AI Error:", error);
+        return null;
+        }
+}
+    
+module.exports = { generateReview, generatePrompt };
