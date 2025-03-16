@@ -3,6 +3,8 @@ require('dotenv').config();
 const connect = require('./connect');
 const express = require('express');
 const cors = require('cors');
+
+
 const authRoutes = require("./routes/authRoutes");
 const scheduleRoutes = require("./routes/scheduleRoutes");
 const activityRoutes = require("./routes/activityRoutes");
@@ -27,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // API
 // app.use("/api/user", require("./routes/userRoutes"));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/activities", activityRoutes);

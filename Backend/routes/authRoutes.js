@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const JWT_SECRET = process.env.JWTKEY;
 
-// REGISTER
+// REGISTER POST GET UPDATE DELETE
 router.post('/register', [
     body('name').notEmpty().withMessage("Name is required"),
     body('email').isEmail().withMessage("Enter a valid email address"),
@@ -24,7 +24,7 @@ async (req, res) => {
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ errors: [{ msg: "Email already exists" }] });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10); // Encrypt password Security
         user = new User({ name, email, password: hashedPassword });
         
         await user.save();
@@ -52,7 +52,7 @@ router.post('/login', [
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "24h" });
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "24h" }); // Security Function
 
         res.json({ 
             token, 

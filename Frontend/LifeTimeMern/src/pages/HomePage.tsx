@@ -8,6 +8,7 @@ import API from "../api/api"; // Use the API instance
 import { ScheduleModal } from "../components/modals/ScheduleActivity";
 import { ActivityModal } from "../components/modals/ScheduleActivity";
 import HealthModal from "../components/modals/Health";
+import axios from "axios"
 
 interface Schedule {
   _id: string;
@@ -39,13 +40,34 @@ const Homepage = () => {
   const [isScheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [isActivityModalOpen, setActivityModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [aiReviewFetched, setAiReviewFetched] = useState(false);
 
   useEffect(() => {
     fetchSchedule();
     fetchActivities();
     fetchHealthData();
-    fetchAiAnalysis();
-  }, []);
+  }, []); // Runs only once on mount
+  
+  const checkAndFetchReview = () => {
+    if (healthData && activities && schedule) {
+      console.log("✅ All data available, fetching AI review...");
+      fetchAiAnalysis();
+    } else {
+      console.log("⏳ Data still missing, retrying...");
+      setTimeout(checkAndFetchReview, 500); // Retry after 500ms
+    }
+  };
+  
+  useEffect(() => {
+    console.log("🔍 Checking conditions for AI Review...");
+  
+    if (!aiReviewFetched && healthData && activities?.length > 0 && schedule?.length > 0) {
+      console.log("✅ All data available, fetching AI review...");
+      fetchAiAnalysis();
+      setAiReviewFetched(true); // Prevent further calls
+    }
+  }, [healthData, activities, schedule, aiReviewFetched]);
+  
   const fetchSchedule = async () => {
     try {
         const response = await API.get("/schedules/current-week");
@@ -127,16 +149,104 @@ const Homepage = () => {
     }
   };
 
-  const fetchAiAnalysis = async () => {
+  const createAiAnalysis = async (month: string, year: number) => {
     try {
-      const month = new Date().toLocaleString("default", { month: "long" }).toLowerCase();
-      const response = await API.get(`/review/${month}`);
-      console.log("AI Analysis API Response:", response.data);
+      const healthData = await fetchHealthData();
+      const activities = await fetchActivities();
+      const scheduleData = await fetchSchedule();
+  
+      console.log("✅ Final Data Sent to AI Review:", { month, year, activities, scheduleData, healthData });
+  
+      if (!healthData || healthData.weight === 0 || healthData.height === 0) {
+        console.warn("⚠️ Health data is missing, aborting AI review.");
+        return;
+      }
+  
+      const response = await API.post(`/review/${month}`, {
+        year,
+        activities,
+        scheduleData,
+        healthData,
+      });
+  
+      console.log("📩 AI Review Response:", response.data);
       setAiAnalysis(response.data.analysis);
     } catch (error) {
-      console.error("Error fetching AI analysis:", error.response ? error.response.data : error);
+      console.error("🚨 Error creating AI analysis:", error);
+    }
+  };  
+
+//   const fetchAiAnalysis = async () => {
+//     try {
+//       const month = new Date().toLocaleString("default", { month: "long" }).toLowerCase();
+//       const year = new Date().getFullYear();
+//       const response = await API.get(`/review/${month}`);
+
+//       if (!response.data) {
+//         console.warn("No AI review found, attempting to create one...");
+//         await createAiAnalysis(month, year);
+//         return;
+//       }
+
+//       setAiAnalysis(response.data.analysis);
+//     } catch (error) {
+//       if (error.response?.status === 404) {
+//         console.warn("No review exists, generating a new one...");
+//         await createAiAnalysis(
+//           new Date().toLocaleString("default", { month: "long" }).toLowerCase(),
+//           new Date().getFullYear()
+//         );
+//       } else {
+//         console.error("Error fetching AI analysis:", error);
+//       }
+//     }
+//   };
+
+const fetchAiAnalysis = async () => {
+    console.log("🚀 Fetching AI Analysis with:", {
+      month: "march",
+      year: 2025,
+      activities,
+      scheduleData: schedule,
+      healthData,
+    });
+  
+    if (!healthData || !activities || !schedule) {
+      console.warn("⚠️ Missing data, aborting AI review.");
+      return;
+    }
+  
+    const token = localStorage.getItem("token"); // 👈 Retrieve token (or from context)
+    if (!token) {
+      console.error("❌ No auth token found, cannot proceed.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/review",
+        {
+          month: "march",
+          year: 2025,
+          activities,
+          scheduleData: schedule,
+          healthData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 👈 Attach token
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("✅ AI Review Fetched:", response.data);
+    } catch (error) {
+      console.error("❌ AI Review Fetch Failed:", error.response?.status, error.response?.data);
     }
   };
+  
+  
 
   return (
     <div className="p-4 space-y-6 w-full">
@@ -237,10 +347,43 @@ const Homepage = () => {
         {showModal && <HealthModal onClose={() => setShowModal(false)} onSave={fetchHealthData} />}
      </motion.div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-        <h1 className="text-xl font-bold">AI Insights</h1>
-        <p>{aiAnalysis || "Hey! I'm the AI that will provide insights for your activities!"}</p>
+     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+        <h1 className="text-xl font-bold mb-4">AI Insights</h1>
+
+        {aiAnalysis ? (
+            <div className="space-y-4">
+            {/* Health Section */}
+            <div className="bg-blue-100 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold">🩺 Health Advice</h2>
+                <p className="text-gray-700">{aiAnalysis.health}</p>
+            </div>
+
+            {/* Exercise Section */}
+            <div className="bg-green-100 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold">💪 Exercise Recommendation</h2>
+                <p className="text-gray-700">{aiAnalysis.exercise}</p>
+            </div>
+
+            {/* Hobby Section */}
+            <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold">🎨 Hobby Suggestion</h2>
+                <p className="text-gray-700">{aiAnalysis.hobby}</p>
+            </div>
+
+            {/* Entertainment Section */}
+            <div className="bg-purple-100 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold">🎬 Entertainment Suggestion</h2>
+                <p className="text-gray-700">{aiAnalysis.entertainment}</p>
+            </div>
+            </div>
+        ) : (
+            <p>
+            Hey! I'm the AI that will provide insights for your activities! I'll give
+            you suggestions once I have enough data!
+            </p>
+        )}
       </motion.div>
+
 
       <ScheduleModal isOpen={isScheduleModalOpen} onClose={() => setScheduleModalOpen(false)} onSuccess={fetchSchedule} />
       <ActivityModal isOpen={isActivityModalOpen} onClose={() => setActivityModalOpen(false)} onSuccess={fetchActivities} />

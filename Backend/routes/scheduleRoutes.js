@@ -4,8 +4,8 @@ const Schedule = require("../models/Schedule");
 const mongoose = require("mongoose");
 const router = express.Router();
 
-// Create/Update Schedule
-router.post("/", authMiddleware, async (req, res) => {
+// Create/Update Schedule 
+router.post("/", authMiddleware, async (req, res) => { 
     try {
         console.log("🔍 Raw Request Body:", req.body);
 
@@ -16,7 +16,7 @@ router.post("/", authMiddleware, async (req, res) => {
         const { title, description, date, category } = req.body;
 
         if (!title || !date || !category) {
-            return res.status(400).json({ msg: "Missing required fields: title, date, or category" });
+            return res.status(400).json({ msg: "Missing required fields: title, date, or category" }); 
         }
 
         if (!req.user || !req.user.userId) {
@@ -27,7 +27,7 @@ router.post("/", authMiddleware, async (req, res) => {
         console.log("User ID from token:", userId);
 
         // Convert `date` into a valid Date object
-        const parsedDate = new Date(date);
+        const parsedDate = new Date(date); 
         if (isNaN(parsedDate.getTime())) {
             return res.status(400).json({ msg: "Invalid date format" });
         }

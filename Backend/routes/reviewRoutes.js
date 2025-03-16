@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/:month", authMiddleware, async (req, res) => {
   try {
     const review = await Review.findOne({ 
-      userId: req.user, 
+      userId: req.user.userId, 
       month: req.params.month.trim(),
       year: new Date().getFullYear() // Ensure fetching only the current year's review
     });
@@ -32,7 +32,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const { month, year, activities, healthData } = req.body;
 
     // Check if review exists
-    let review = await Review.findOne({ userId: req.user, month, year });
+    let review = await Review.findOne({ userId: req.user.userId, month, year });
 
     // Call AI to generate review analysis
     const aiAnalysis = await generateReview(month, year, activities, healthData);
@@ -42,7 +42,7 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 
     if (!review) {
-      review = new Review({ userId: req.user, month, year, analysis: aiAnalysis });
+      review = new Review({ userId: req.user.userId, month, year, analysis: aiAnalysis });
     } else {
       review.analysis = aiAnalysis;
     }
