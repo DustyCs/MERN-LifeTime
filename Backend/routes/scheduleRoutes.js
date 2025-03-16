@@ -44,6 +44,7 @@ router.get('/current-week', authMiddleware, async (req, res) => {
         res.json(schedules.length ? schedules : []);
     }
     catch(error){
+        console.error(error);
         res.status(500).json({ msg: "Server Error - attempting to get current week" });
     }
 });

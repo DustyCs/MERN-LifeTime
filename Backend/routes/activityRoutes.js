@@ -34,6 +34,27 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+// Get activities for the current week
+
+router.get('/current-week', authMiddleware, async (req, res) => {
+  try {
+      const today = new Date();
+      const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday
+      const endOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7)); // Sunday
+
+      const activities = await Activity.find({
+          userId: req.user,
+          date: { $gte: startOfWeek, $lte: endOfWeek },
+      });
+
+      // Ensure always returning an array, even if no activities exist
+      res.json(activities.length ? activities : []);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ msg: "Server Error - attempting to get current week activities" });
+  }
+});
+
 // Get activities for a specific month
 router.get("/:month", authMiddleware, async (req, res) => {
   try {
