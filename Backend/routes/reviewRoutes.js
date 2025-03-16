@@ -27,31 +27,6 @@ router.get("/:month", authMiddleware, async (req, res) => {
 
 // Create/Update Monthly Review
 
-// router.post("/", authMiddleware, async (req, res) => {
-//   try {
-//     const { month, year, analysis } = req.body;
-
-//     let review = await Review.findOne({ userId: req.user, month, year });
-
-//     if (!review) {
-//       review = new Review({
-//         userId: req.user,
-//         month,
-//         year,
-//         analysis,
-//       });
-//     } else {
-//       review.analysis = analysis; 
-//     }
-
-//     await review.save();
-//     res.json(review);
-//   } catch (err) {
-//     console.error("Review Update Error:", err);
-//     res.status(500).json({ msg: "Server Error - attempting to update review" });
-//   }
-// });
-
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const { month, year, activities, healthData } = req.body;

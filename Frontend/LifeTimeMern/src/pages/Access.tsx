@@ -18,7 +18,7 @@ const AuthPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
   
     if (isRegister && formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
@@ -33,7 +33,7 @@ const AuthPage = () => {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // Required for cookies/sessions
+        credentials: "include",
         body: JSON.stringify(
           isRegister
             ? { name: formData.name, email: formData.email, password: formData.password }
@@ -44,11 +44,12 @@ const AuthPage = () => {
       const data = await response.json();
       if (response.ok) {
         if (!isRegister) {
-          // Store user info in local storage
-          localStorage.setItem("user", JSON.stringify(data.user)); // Assuming backend sends { user: { name, email } }
+          // ✅ Store user details and token in local storage
+          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("token", data.token);
         }
         alert(isRegister ? "Registration successful!" : "Login successful!");
-        navigate("/dashboard");
+        navigate("/home");
       } else {
         setError(data.msg || "Something went wrong. Please try again.");
       }
@@ -57,7 +58,7 @@ const AuthPage = () => {
       setError("Failed to connect to the server. Please try again later.");
     }
   };
-  
+
   return (
     <div className="auth-div lg:w-full flex h-screen items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md 

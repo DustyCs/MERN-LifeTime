@@ -10,10 +10,6 @@ export const Links = [
         path: "/"
     },
     {
-        name: "Register/Login",
-        path: "/access"
-    },
-    {
         name: "Schedule",
         path: "/schedule"
     },
@@ -32,5 +28,15 @@ export const Links = [
     {
         name: "Life Overview",
         path: "/life_overview"
+    },
+    {
+        name: "Register/Login",
+        path: "/access",
+        showIfLoggedOut: true // ✅ Only show if user is NOT logged in
+    },
+    {
+        name: "Logout",
+        path: "#",
+        showIfLoggedIn: true // ✅ Only show if user IS logged in
     }
 ]

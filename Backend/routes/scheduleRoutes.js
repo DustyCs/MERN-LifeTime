@@ -40,13 +40,13 @@ router.get('/current-week', authMiddleware, async (req, res) => {
             date: { $gte: startOfWeek, $lte: endOfWeek },
         });
 
-        res.json(schedules.length ? schedules : { msg: "Create something today" });
+        // Ensure always returning an array, even if no schedules exist
+        res.json(schedules.length ? schedules : []);
     }
     catch(error){
         res.status(500).json({ msg: "Server Error - attempting to get current week" });
     }
 });
-
 
 // Get Full Schedule
 
