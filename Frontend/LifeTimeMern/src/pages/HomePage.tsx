@@ -4,7 +4,7 @@ import { Card, CardContent } from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
-import axios from "axios";
+import API from "../api/api"; // Use the API instance
 import { ScheduleModal } from "../components/modals/ScheduleActivity";
 import { ActivityModal } from "../components/modals/ScheduleActivity";
 
@@ -47,58 +47,43 @@ const Homepage = () => {
 
   const fetchSchedule = async () => {
     try {
-      const response = await axios.get("/api/schedule/current-week");
-      
-      // Check if the response status is OK (200)
-      if (response.status === 200) {
-        const data = response.data;
-        
-        // Check if the response is an array
-        if (Array.isArray(data)) {
-          setSchedule(data);
-        } else {
-          console.error("Fetched schedule data is not an array", data);
-          setSchedule([]); // Set to empty array if not an array
-        }
-      } else {
-        console.error("Error fetching schedule: Response status", response.status);
-        setSchedule([]); // Set to empty array in case of error
-      }
+      const response = await API.get("/schedules/current-week"); // Fetch grouped schedules
+      const schedules = response.data;
+  
+      // Extract events from schedules
+      const allEvents = schedules.flatMap(schedule =>
+        schedule.events.map(event => ({
+          ...event,
+          date: `${schedule.year}-${schedule.month.toString().padStart(2, "0")}-${event.day.toString().padStart(2, "0")}`, // Format date
+        }))
+      );
+  
+      setSchedule(allEvents);
     } catch (error) {
       console.error("Error fetching schedule:", error);
-      setSchedule([]); // Set to empty array in case of error
+      setSchedule([]);
     }
   };
-  
+
   const fetchActivities = async () => {
     try {
-      const response = await axios.get("/api/activity/current-week");
-      
-      // Check if the response status is OK (200)
-      if (response.status === 200) {
-        const data = response.data;
-        
-        // Check if the response is an array
-        if (Array.isArray(data)) {
-          setActivities(data);
-        } else {
-          console.error("Fetched activities data is not an array", data);
-          setActivities([]); // Set to empty array if not an array
-        }
+      const response = await API.get("/activities/current-week");
+      if (Array.isArray(response.data)) {
+        setActivities(response.data);
       } else {
-        console.error("Error fetching activities: Response status", response.status);
-        setActivities([]); // Set to empty array in case of error
+        console.error("Fetched activities data is not an array", response.data);
+        setActivities([]);
       }
     } catch (error) {
       console.error("Error fetching activities:", error);
-      setActivities([]); // Set to empty array in case of error
+      setActivities([]);
     }
   };
 
   const fetchHealthData = async () => {
     try {
-      const { data } = await axios.get("/api/health");
-      setHealthData(data);
+      const response = await API.get("/health");
+      setHealthData(response.data);
     } catch (error) {
       console.error("Error fetching health data:", error);
     }
@@ -107,36 +92,49 @@ const Homepage = () => {
   const fetchAiAnalysis = async () => {
     try {
       const month = new Date().toLocaleString("default", { month: "long" });
-      const { data } = await axios.get(`/api/review/${month}`);
-      setAiAnalysis(data.analysis);
+      const response = await API.get(`/review/${month}`);
+      setAiAnalysis(response.data.analysis);
     } catch (error) {
       console.error("Error fetching AI analysis:", error);
     }
   };
-
-  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   return (
     <div className="p-4 space-y-6 w-full">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h1 className="text-xl font-bold">Current Week Schedule</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {daysOfWeek.map((day) => {
-            // Only run filter if `schedule` is an array
-            const daySchedule = Array.isArray(schedule) ? schedule.filter((s) => new Date(s.date).toLocaleString("en-US", { weekday: "long" }) === day) : [];
-            const dayActivities = Array.isArray(activities) ? activities.filter((a) => new Date(a.date).toLocaleString("en-US", { weekday: "long" }) === day) : [];
+          {Array.from({ length: 7 }).map((_, index) => {
+            const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() - currentDate.getDay() + index);
+
+            const formattedDate = currentDate.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            });
+            const dayName = currentDate.toLocaleDateString("en-US", { weekday: "long" });
+
+            const formattedISODate = currentDate.toISOString().split("T")[0];
+            const daySchedule = schedule.filter((s) => s.date === formattedISODate);
+            const dayActivities = activities.filter((a) => a.date.split("T")[0] === formattedISODate);
 
             return (
-              <Card key={day}>
+              <Card key={formattedISODate}>
                 <CardContent>
-                  <h2 className="font-semibold">{day}</h2>
+                  <h2 className="font-semibold">
+                    {dayName} - {formattedDate}
+                  </h2>
                   {daySchedule.length > 0 || dayActivities.length > 0 ? (
                     <>
                       {daySchedule.map((s) => (
-                        <p key={s._id}>{s.title} - {s.category}</p>
+                        <p key={s._id}>
+                          {s.title} - {s.category}
+                        </p>
                       ))}
                       {dayActivities.map((a) => (
-                        <p key={a._id}>{a.activityType} - {a.duration} mins</p>
+                        <p key={a._id}>
+                          {a.activityType} - {a.duration} mins
+                        </p>
                       ))}
                     </>
                   ) : (
@@ -148,8 +146,8 @@ const Homepage = () => {
           })}
         </div>
         <div className="flex space-x-4 mt-4">
-            <Button onClick={() => { console.log("Create Schedule clicked"); setScheduleModalOpen(true); }}>Create Schedule</Button>
-            <Button onClick={() => { console.log("Create Activity clicked"); setActivityModalOpen(true); }}>Create Activity</Button>
+          <Button onClick={() => setScheduleModalOpen(true)}>Create Schedule</Button>
+          <Button onClick={() => setActivityModalOpen(true)}>Create Activity</Button>
         </div>
       </motion.div>
 

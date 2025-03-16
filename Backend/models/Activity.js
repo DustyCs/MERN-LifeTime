@@ -9,7 +9,7 @@ const ActivitySchema = new mongoose.Schema({
   activityType: { type: String, required: true },
   duration: { type: Number, required: true },
   distance: { type: Number },
-  date: { type: String, required: true },
+  date: { type: Date, required: true },
   completed: { type: Boolean, default: false },
 });
 

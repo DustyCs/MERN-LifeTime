@@ -47,31 +47,29 @@ router.get("/", authMiddleware, async (req, res) => {
 });
 
 // Get activities for the current week
-router.get("/current-week", authMiddleware, async (req, res) => {
+router.get("/current-week", async (req, res) => {
   try {
-    const userId = req.user;
     const today = new Date();
-
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Sunday start
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() - today.getDay() + 7);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday end
     endOfWeek.setHours(23, 59, 59, 999);
 
-    console.log("Fetching weekly activities for:", userId);
-    console.log("Start of week:", startOfWeek.toISOString(), "End of week:", endOfWeek.toISOString());
+    console.log("Fetching activities for week from:", startOfWeek, "to:", endOfWeek);
 
     const activities = await Activity.find({
-      userId,
-      date: { $gte: startOfWeek.toISOString(), $lte: endOfWeek.toISOString() }
+      date: {
+        $gte: startOfWeek,
+        $lte: endOfWeek,
+      },
     });
 
-    res.json(activities || []);
-  } catch (error) {
-    console.error("Get Current Week Activities Error:", error.message);
-    res.status(500).json({ msg: "Server Error - attempting to get current week activities" });
+    res.json(activities);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
