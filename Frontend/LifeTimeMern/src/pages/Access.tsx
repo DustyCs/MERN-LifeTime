@@ -44,7 +44,6 @@ const AuthPage = () => {
       const data = await response.json();
       if (response.ok) {
         if (!isRegister) {
-          // ✅ Store user details and token in local storage
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("token", data.token);
         }

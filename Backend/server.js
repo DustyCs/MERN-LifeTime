@@ -10,6 +10,7 @@ const healthRoutes = require("./routes/healthRoutes");
 const performanceRoutes = require("./routes/performanceRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const lifeOverviewRoutes = require("./routes/lifeOverviewRoutes");
+const geminiRoutes = require("./routes/geminiRoutes");
 
 const mongoose = require('mongoose');
 
@@ -32,6 +33,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/performance", performanceRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/life-overview", lifeOverviewRoutes);
+app.use("/api/gemini", geminiRoutes);
 
 
 // Connect to MongoDB
