@@ -16,6 +16,8 @@ const geminiRoutes = require("./routes/geminiRoutes");
 
 const mongoose = require('mongoose');
 
+import path from "path"
+
 const app = express();
 const PORT = 5000;
 
