@@ -173,8 +173,6 @@ router.get("/", authMiddleware, async (req, res) => {
 });
 
 // Get Month Schedule
-
-// Get Current Month Schedule
 router.get("/current-month", authMiddleware, async (req, res) => {
   try {
       const userId = req.user.userId;

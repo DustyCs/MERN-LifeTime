@@ -20,23 +20,21 @@ export default function Schedule() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await API.get('/schedules/current-month'); // 🔥 Updated to the correct endpoint
-      console.log("📅 Fetched schedules:", response.data);
-
+      const response = await API.get('/schedules/current-month');
       if (response.data.length === 0) {
-        setFeedback("Your schedules are clear, create a new one!"); // No schedules message
+        setFeedback("Your schedules are clear, create a new one!");
       } else {
         const schedules = response.data.map(schedule => ({
           title: schedule.title,
           start: new Date(schedule.date),
           end: new Date(schedule.date),
-          allDay: true,
+          allDay: false,
         }));
         setEvents(schedules);
-        generateFeedback(response.data); // 🔥 Auto-fetch feedback when schedules update
+        generateFeedback(response.data);
       }
     } catch (error) {
-      console.error('❌ Error fetching schedules:', error);
+      console.error('Error fetching schedules:', error);
     }
   };
 
@@ -45,7 +43,7 @@ export default function Schedule() {
       const response = await API.post('/gemini', { prompt: 'Give feedback about my schedules for the month.', data: scheduleData });
       setFeedback(response.data || "Your schedules are clear, create a new one!");
     } catch (error) {
-      console.error('❌ Error generating feedback:', error);
+      console.error('Error generating feedback:', error);
     }
   };
 
@@ -55,6 +53,23 @@ export default function Schedule() {
 
   const handlePrevMonth = () => {
     setCurrentDate(moment(currentDate).subtract(1, 'months').toDate());
+  };
+
+  const CustomToolbar = (toolbar) => {
+    return (
+      <div className="rbc-toolbar">
+        <span className="rbc-toolbar-label">{toolbar.label}</span>
+        <span className="rbc-btn-group">
+          {/* Hide Today, Previous, and Next buttons */}
+        </span>
+        <span className="rbc-btn-group">
+          <button onClick={() => toolbar.onView("month")}>Month</button>
+          <button onClick={() => toolbar.onView("week")}>Week</button>
+          <button onClick={() => toolbar.onView("day")}>Day</button>
+          <button onClick={() => toolbar.onView("agenda")}>Agenda</button>
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -70,7 +85,8 @@ export default function Schedule() {
         endAccessor="end"
         style={{ height: 700 }}
         date={currentDate}
-        onNavigate={date => setCurrentDate(date)}
+        onNavigate={date => setCurrentDate(date)
+        }
       />
       <div className="flex justify-between mt-4">
         <Button onClick={handlePrevMonth}>Previous Month</Button>
