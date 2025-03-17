@@ -126,6 +126,47 @@ router.get("/:month", authMiddleware, async (req, res) => {
   }
 });
 
+// Mark an activity as completed
+router.patch("/:id/complete", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const activity = await Activity.findByIdAndUpdate(id, { completed: true }, { new: true });
+    res.json(activity);
+  } catch (error) {
+    console.error("Mark Activity Completed Error:", error.message);
+    res.status(500).json({ msg: "Server Error - attempting to mark activity as completed" });
+  }
+});
+
+// Mark an activity as non-completed
+router.patch("/:id/uncomplete", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const activity = await Activity.findByIdAndUpdate(id, { completed: false }, { new: true });
+    res.json(activity);
+  } catch (error) {
+    console.error("Mark Activity Non-Completed Error:", error.message);
+    res.status(500).json({ msg: "Server Error - attempting to mark activity as non-completed" });
+  }
+});
+
+// Update an activity
+router.put("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { activityType, duration, distance, date } = req.body;
+    const updatedActivity = await Activity.findByIdAndUpdate(
+      id,
+      { activityType, duration, distance, date: new Date(date) },
+      { new: true }
+    );
+    res.json(updatedActivity);
+  } catch (error) {
+    console.error("Update Activity Error:", error.message);
+    res.status(500).json({ msg: "Server Error - attempting to update activity" });
+  }
+});
+
 module.exports = router;
 
 
