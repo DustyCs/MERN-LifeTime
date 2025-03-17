@@ -2,9 +2,21 @@ export type NavLink = {
     name: string;
     path: string;
     onClick?: () => void;
+    showIfLoggedIn?: boolean;
+    showIfLoggedOut?: boolean;
 };
 
-export const Links = [
+const getCurrentMonth = () => {
+    const date = new Date();
+    return date.toLocaleString('default', { month: 'long' }).toLowerCase(); // e.g., "march"
+};
+
+const getCurrentYear = () => {
+    const date = new Date();
+    return date.getFullYear().toString(); // e.g., "2025"
+};
+
+export const Links: NavLink[] = [
     {
         name: "Home",
         path: "/"
@@ -23,20 +35,22 @@ export const Links = [
     },
     {
         name: "Monthly Review",
-        path: "/monthly_review"
+        path: `/monthly_review/${getCurrentMonth()}`,
+        showIfLoggedIn: true
     },
     {
         name: "Life Overview",
-        path: "/life_overview"
+        path: `/life_overview/${getCurrentYear()}`,
+        showIfLoggedIn: true
     },
     {
         name: "Register/Login",
         path: "/access",
-        showIfLoggedOut: true // ✅ Only show if user is NOT logged in
+        showIfLoggedOut: true
     },
     {
         name: "Logout",
         path: "#",
-        showIfLoggedIn: true // ✅ Only show if user IS logged in
+        showIfLoggedIn: true
     }
-]
+];

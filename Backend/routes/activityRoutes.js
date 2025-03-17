@@ -1,7 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const Activity = require("../models/Activity");
-
+const mongoose = require("mongoose");
 const router = express.Router();
 
 // Create a new activity
@@ -9,11 +9,16 @@ router.post("/", authMiddleware, async (req, res) => {
   try {
     console.log("Starting Activity Creation...");
     
-    const userId = req.user; // Ensure correct extraction
+    const userId = req.user.userId; // Ensure correct extraction
     const { activityType, duration, distance, date } = req.body;
 
     console.log("Received Body:", req.body);
     console.log("Extracted userId:", userId);
+
+    // const parsedDate = new Date(date); 
+    // if (isNaN(parsedDate.getTime())) {
+    //     return res.status(400).json({ msg: "Invalid date format" });
+    // }
 
     const newActivity = new Activity({
       userId,
@@ -31,6 +36,28 @@ router.post("/", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to create activity" });
   }
 });
+
+// in case it doesnt work
+// router.post("/", authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.user.userId; // Ensure correct extraction
+//     const { activityType, duration, distance, date } = req.body;
+
+//     const newActivity = new Activity({
+//       userId,
+//       activityType,
+//       duration,
+//       distance,
+//       date: new Date(date) // Ensure the date is stored as a Date object
+//     });
+
+//     await newActivity.save();
+//     res.json(newActivity);
+//   } catch (error) {
+//     console.error("Create Activity Error:", error.message);
+//     res.status(500).json({ msg: "Server Error - attempting to create activity" });
+//   }
+// });
 
 // Get all activities
 router.get("/", authMiddleware, async (req, res) => {
@@ -76,10 +103,8 @@ router.get("/current-week", async (req, res) => {
 // Get activities for a specific month (YYYY-MM format)
 router.get("/:month", authMiddleware, async (req, res) => {
   try {
-    const userId = req.user;
+    const userId = req.user.userId; // Ensure correct extraction
     const { month } = req.params;
-
-    console.log("Fetching activities for month:", month, "User:", userId);
 
     const [year, monthNum] = month.split("-").map(Number);
     if (!year || !monthNum || monthNum < 1 || monthNum > 12) {
@@ -89,12 +114,10 @@ router.get("/:month", authMiddleware, async (req, res) => {
     const startOfMonth = new Date(year, monthNum - 1, 1);
     const endOfMonth = new Date(year, monthNum, 0, 23, 59, 59, 999);
 
-    console.log("Start of month:", startOfMonth, "End of month:", endOfMonth);
-
     const activities = await Activity.find({
-      userId,
-      date: { $gte: startOfMonth.toISOString(), $lte: endOfMonth.toISOString() }
-    });
+      userId: new mongoose.Types.ObjectId(userId), // Convert userId to ObjectId using 'new'
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    }).sort({ date: -1 }); // Sort by date descending
 
     res.json(activities || []);
   } catch (error) {
@@ -102,5 +125,58 @@ router.get("/:month", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to get monthly activities" });
   }
 });
+
+// Mark an activity as completed
+router.patch("/:id/complete", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: "Invalid activity ID" });
+    }
+    
+    const activity = await Activity.findByIdAndUpdate(id, { completed: true }, { new: true });
+    
+    if (!activity) {
+      return res.status(404).json({ msg: "Activity not found" });
+    }
+
+    res.json(activity);
+  } catch (error) {
+    console.error("Mark Activity Completed Error:", error.message);
+    res.status(500).json({ msg: "Server Error - attempting to mark activity as completed" });
+  }
+});
+
+// Mark an activity as non-completed
+router.patch("/:id/uncomplete", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const activity = await Activity.findByIdAndUpdate(id, { completed: false }, { new: true });
+    res.json(activity);
+  } catch (error) {
+    console.error("Mark Activity Non-Completed Error:", error.message);
+    res.status(500).json({ msg: "Server Error - attempting to mark activity as non-completed" });
+  }
+});
+
+// Update an activity
+router.put("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { activityType, duration, distance, date } = req.body;
+    const updatedActivity = await Activity.findByIdAndUpdate(
+      id,
+      { activityType, duration, distance, date: new Date(date) },
+      { new: true }
+    );
+    res.json(updatedActivity);
+  } catch (error) {
+    console.error("Update Activity Error:", error.message);
+    res.status(500).json({ msg: "Server Error - attempting to update activity" });
+  }
+});
+
+module.exports = router;
+
 
 module.exports = router;
