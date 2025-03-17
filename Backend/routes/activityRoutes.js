@@ -1,7 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const Activity = require("../models/Activity");
-
+const mongoose = require("mongoose");
 const router = express.Router();
 
 // Create a new activity
@@ -36,6 +36,28 @@ router.post("/", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to create activity" });
   }
 });
+
+// in case it doesnt work
+// router.post("/", authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.user.userId; // Ensure correct extraction
+//     const { activityType, duration, distance, date } = req.body;
+
+//     const newActivity = new Activity({
+//       userId,
+//       activityType,
+//       duration,
+//       distance,
+//       date: new Date(date) // Ensure the date is stored as a Date object
+//     });
+
+//     await newActivity.save();
+//     res.json(newActivity);
+//   } catch (error) {
+//     console.error("Create Activity Error:", error.message);
+//     res.status(500).json({ msg: "Server Error - attempting to create activity" });
+//   }
+// });
 
 // Get all activities
 router.get("/", authMiddleware, async (req, res) => {
@@ -81,10 +103,8 @@ router.get("/current-week", async (req, res) => {
 // Get activities for a specific month (YYYY-MM format)
 router.get("/:month", authMiddleware, async (req, res) => {
   try {
-    const userId = req.user;
+    const userId = req.user.userId; // Ensure correct extraction
     const { month } = req.params;
-
-    console.log("Fetching activities for month:", month, "User:", userId);
 
     const [year, monthNum] = month.split("-").map(Number);
     if (!year || !monthNum || monthNum < 1 || monthNum > 12) {
@@ -94,12 +114,10 @@ router.get("/:month", authMiddleware, async (req, res) => {
     const startOfMonth = new Date(year, monthNum - 1, 1);
     const endOfMonth = new Date(year, monthNum, 0, 23, 59, 59, 999);
 
-    console.log("Start of month:", startOfMonth, "End of month:", endOfMonth);
-
     const activities = await Activity.find({
-      userId,
-      date: { $gte: startOfMonth.toISOString(), $lte: endOfMonth.toISOString() }
-    }).sort({ date: -1 });;
+      userId: new mongoose.Types.ObjectId(userId), // Convert userId to ObjectId using 'new'
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    }).sort({ date: -1 }); // Sort by date descending
 
     res.json(activities || []);
   } catch (error) {
@@ -107,5 +125,8 @@ router.get("/:month", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to get monthly activities" });
   }
 });
+
+module.exports = router;
+
 
 module.exports = router;

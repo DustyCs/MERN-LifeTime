@@ -36,14 +36,20 @@ export default function Activity() {
   const completedActivities = activities.filter(activity => activity.completed);
   const nonCompletedActivities = activities.filter(activity => !activity.completed);
 
+  const formatMonth = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+  };
+
   return (
     <main className="p-4 w-[70%] mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-4xl font-bold">Activities</h3>
         <Button onClick={() => setModalOpen(true)}>Create Activity</Button>
       </div>
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between items-center mt-4">
         <Button onClick={handlePrevMonth}>Previous Month</Button>
+        <h4 className="text-2xl font-semibold">{formatMonth(currentMonth)}</h4>
         <Button onClick={handleNextMonth}>Next Month</Button>
       </div>
       <div className="mt-4">
