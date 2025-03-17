@@ -9,6 +9,7 @@ import AuthPage from './pages/Access';
 import Homepage from './pages/HomePage';
 import Activity from './pages/Activity';
 import Performance from './pages/Performance';
+import MonthlyReview from './pages/MonthlyReview';
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/activity_list" element={<Activity />} /> 
         <Route path="/performance" element={<Performance/>} />
-        <Route path="/monthly_review" element={<h1>Home</h1>} />
+        <Route path="/monthly_review/:month" element={<MonthlyReview/>} />
         <Route path="/life_overview" element={<h1>Home</h1>} />
         <Route path="*"  element={<NotFound />} />
       </Route>

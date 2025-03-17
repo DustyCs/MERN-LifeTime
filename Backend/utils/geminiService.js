@@ -116,6 +116,68 @@ async function generateReview(month, year, activities, healthData) {
     }
 }
 
+async function generateDetailedReview(review) {
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: "v1" });
+
+        const prompt = `
+            Provide a detailed analysis for the following review:
+            ${JSON.stringify(review.analysis)}
+    
+            Expand on each section with more detailed advice and recommendations.
+    
+            Respond **only** with a JSON object, with some brief additional text or explanations.
+    
+            Expected JSON format:
+            {
+              "health": "Detailed health advice...",
+              "exercise": "Detailed exercise recommendation...",
+              "hobby": "Detailed hobby suggestion...",
+              "entertainment": "Detailed entertainment suggestion..."
+            }
+        `;
+
+        console.log("Sending request to Gemini...");
+        const response = await Promise.race([
+            model.generateContent({
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{ text: prompt }]
+                    }
+                ]
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("AI Timeout")), 10000)) // 10 sec timeout
+        ]);
+
+        console.log("Received AI response:", response);
+
+        // **Check if response is valid**
+        if (!response || !response.response || !response.response.candidates) {
+            throw new Error("Invalid AI response structure");
+        }
+
+        let aiData = response.response.candidates[0]?.content?.parts?.[0]?.text?.trim();
+
+        console.log("Raw AI Response Text:", aiData);
+
+        // **Fix: Remove unwanted markdown formatting**
+        // Extract only the JSON portion from the AI response
+        const jsonMatch = aiData.match(/```json\s*([\s\S]*?)\s*```/);
+        aiData = jsonMatch ? jsonMatch[1].trim() : aiData.trim();
+
+        // **Final Parsing Step**
+        try {
+            return JSON.parse(aiData);
+        } catch (parseError) {
+            console.error("AI Response Parsing Error:", parseError);
+            throw new Error("Failed to parse AI response as JSON.");
+        }
+    } catch (error) {
+        console.error("Gemini AI Error:", error);
+        return null;
+    }
+}
 
 
 async function generatePrompt(prompt){
@@ -140,4 +202,4 @@ async function generatePrompt(prompt){
         }
 }
     
-module.exports = { generateReview, generatePrompt };
+module.exports = { generateReview, generatePrompt, generateDetailedReview };

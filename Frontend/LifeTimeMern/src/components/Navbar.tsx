@@ -22,7 +22,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className=" w-70 bg-[#f54257] text-white min-h-screen p-4">
+    <nav className="w-70 bg-[#f54257] text-white min-h-screen p-4">
       <div className="text-5xl font-bold mb-4">LifeTime</div>
       <div className="flex flex-col space-y-2 sticky top-0">
         {Links.map((link) => {

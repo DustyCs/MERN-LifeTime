@@ -28,13 +28,14 @@ router.get("/current-month", authMiddleware, async (req, res) => {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-    const [completedActivities, incompleteActivities, healthData] = await Promise.all([
+    const [completedActivities, incompleteActivities, healthData, activities] = await Promise.all([
       Activity.countDocuments({ userId, completed: true, date: { $gte: startOfMonth, $lte: endOfMonth } }),
       Activity.countDocuments({ userId, completed: false, date: { $gte: startOfMonth, $lte: endOfMonth } }),
-      Health.findOne({ userId }).sort({ createdAt: -1 }).limit(1)
+      Health.find({ userId }).sort({ createdAt: -1 }), // Fetch all health data
+      Activity.find({ userId, date: { $gte: startOfMonth, $lte: endOfMonth } }).sort({ date: -1 })
     ]);
 
-    res.json({ completedActivities, incompleteActivities, healthData });
+    res.json({ completedActivities, incompleteActivities, healthData, activities });
   } catch (err) {
     console.error("Get Performance Data Error:", err);
     res.status(500).json({ msg: "Server Error - attempting to get performance data" });
