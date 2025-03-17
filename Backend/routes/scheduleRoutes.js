@@ -172,6 +172,65 @@ router.get("/", authMiddleware, async (req, res) => {
     }
 });
 
+// Get Month Schedule
+
+// Get Current Month Schedule
+router.get("/current-month", authMiddleware, async (req, res) => {
+  try {
+      const userId = req.user.userId;
+      const objectIdUserId = new mongoose.Types.ObjectId(userId);
+
+      const today = new Date();
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+      console.log("Start of Month:", startOfMonth);
+      console.log("End of Month:", endOfMonth);
+
+      // Fetch schedules in NEW format (individual documents)
+      const newFormatSchedules = await Schedule.find({
+          userId: objectIdUserId,
+          date: { $gte: startOfMonth, $lte: endOfMonth }
+      });
+
+      // Fetch schedules in OLD format (events array)
+      const oldFormatSchedules = await Schedule.find({
+          userId: objectIdUserId,
+          "events.date": { $gte: startOfMonth, $lte: endOfMonth }
+      });
+
+      console.log("New Format Schedules:", JSON.stringify(newFormatSchedules, null, 2));
+      console.log("Old Format Schedules:", JSON.stringify(oldFormatSchedules, null, 2));
+
+      // Extract all events from old format
+      const oldFormatEvents = oldFormatSchedules.flatMap(schedule =>
+          schedule.events.filter(event => {
+              const eventDate = new Date(event.date);
+              return eventDate >= startOfMonth && eventDate <= endOfMonth;
+          })
+      );
+
+      // Merge both formats into a single response
+      const allEvents = [
+          ...newFormatSchedules.map(sch => ({
+              _id: sch._id,
+              title: sch.title,
+              description: sch.description,
+              date: sch.date,
+              category: sch.category
+          })),
+          ...oldFormatEvents
+      ];
+
+      console.log("Final Filtered Events:", JSON.stringify(allEvents, null, 2));
+
+      res.json(allEvents);
+  } catch (error) {
+      console.error("Get Current Month Schedules Error:", error.message);
+      res.status(500).json({ msg: "Server Error - attempting to get current month schedules" });
+  }
+});
+
 
 // Update Schedule
 router.put("/:id", authMiddleware, async (req, res) => {

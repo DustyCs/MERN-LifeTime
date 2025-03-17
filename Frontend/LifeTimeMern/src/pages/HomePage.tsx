@@ -48,16 +48,6 @@ const Homepage = () => {
     fetchHealthData();
   }, []); // Runs only once on mount
   
-  const checkAndFetchReview = () => {
-    if (healthData && activities && schedule) {
-      console.log("✅ All data available, fetching AI review...");
-      fetchAiAnalysis();
-    } else {
-      console.log("⏳ Data still missing, retrying...");
-      setTimeout(checkAndFetchReview, 500); // Retry after 500ms
-    }
-  };
-  
   useEffect(() => {
     console.log("🔍 Checking conditions for AI Review...");
   
@@ -149,60 +139,7 @@ const Homepage = () => {
     }
   };
 
-  const createAiAnalysis = async (month: string, year: number) => {
-    try {
-      const healthData = await fetchHealthData();
-      const activities = await fetchActivities();
-      const scheduleData = await fetchSchedule();
-  
-      console.log("✅ Final Data Sent to AI Review:", { month, year, activities, scheduleData, healthData });
-  
-      if (!healthData || healthData.weight === 0 || healthData.height === 0) {
-        console.warn("⚠️ Health data is missing, aborting AI review.");
-        return;
-      }
-  
-      const response = await API.post(`/review/${month}`, {
-        year,
-        activities,
-        scheduleData,
-        healthData,
-      });
-  
-      console.log("📩 AI Review Response:", response.data);
-      setAiAnalysis(response.data.analysis);
-    } catch (error) {
-      console.error("🚨 Error creating AI analysis:", error);
-    }
-  };  
-
-//   const fetchAiAnalysis = async () => {
-//     try {
-//       const month = new Date().toLocaleString("default", { month: "long" }).toLowerCase();
-//       const year = new Date().getFullYear();
-//       const response = await API.get(`/review/${month}`);
-
-//       if (!response.data) {
-//         console.warn("No AI review found, attempting to create one...");
-//         await createAiAnalysis(month, year);
-//         return;
-//       }
-
-//       setAiAnalysis(response.data.analysis);
-//     } catch (error) {
-//       if (error.response?.status === 404) {
-//         console.warn("No review exists, generating a new one...");
-//         await createAiAnalysis(
-//           new Date().toLocaleString("default", { month: "long" }).toLowerCase(),
-//           new Date().getFullYear()
-//         );
-//       } else {
-//         console.error("Error fetching AI analysis:", error);
-//       }
-//     }
-//   };
-
-const fetchAiAnalysis = async () => {
+  const fetchAiAnalysis = async () => {
     console.log("🚀 Fetching AI Analysis with:", {
       month: "march",
       year: 2025,
@@ -210,18 +147,18 @@ const fetchAiAnalysis = async () => {
       scheduleData: schedule,
       healthData,
     });
-  
-    if (!healthData || !activities || !schedule) {
+
+    if (!healthData || activities.length === 0 || schedule.length === 0) {
       console.warn("⚠️ Missing data, aborting AI review.");
       return;
     }
-  
+
     const token = localStorage.getItem("token"); // 👈 Retrieve token (or from context)
     if (!token) {
       console.error("❌ No auth token found, cannot proceed.");
       return;
     }
-  
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/review",
@@ -239,12 +176,21 @@ const fetchAiAnalysis = async () => {
           },
         }
       );
-  
+
       console.log("✅ AI Review Fetched:", response.data);
+
+      // 🔥 Ensure response contains the expected structure before updating state
+      if (response.data && response.data.analysis) {
+        setAiAnalysis(response.data.analysis);
+      } else {
+        console.warn("⚠️ AI Analysis data is missing in the response.");
+        setAiAnalysis(null);
+      }
     } catch (error) {
       console.error("❌ AI Review Fetch Failed:", error.response?.status, error.response?.data);
+      setAiAnalysis(null); // Avoid leaving stale state
     }
-  };
+};
   
   
 
@@ -349,7 +295,6 @@ const fetchAiAnalysis = async () => {
 
      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h1 className="text-xl font-bold mb-4">AI Insights</h1>
-
         {aiAnalysis ? (
             <div className="space-y-4">
             {/* Health Section */}
