@@ -2,7 +2,7 @@ import React from "react";
 import "../css/styles.css";
 import { Links } from "../data/links";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 
 export default function Navbar() {
   const { user, setUser } = useAuth();
@@ -16,7 +16,8 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-70 bg-[#f54257] text-white min-h-screen p-4">
+    <nav className="w-70 bg-[#f54257] text-white min-h-screen p-4
+                    ">
       <div className="text-5xl font-bold mb-4">LifeTime</div>
       <div className="flex flex-col space-y-2 sticky top-0">
         {Links.map((link) => {
