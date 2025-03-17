@@ -307,26 +307,26 @@ const Homepage = () => {
         {aiAnalysis ? (
             <div className="space-y-4">
             {/* Health Section */}
-            <div className="bg-blue-100 p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-semibold">🩺 Health Advice</h2>
-                <p className="text-gray-700">{aiAnalysis.health}</p>
+            <div className="bg-red-300 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg text-white font-semibold">Health Advice</h2>
+                <p className="text-gray-900">{aiAnalysis.health}</p>
             </div>
 
             {/* Exercise Section */}
-            <div className="bg-green-100 p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-semibold">💪 Exercise Recommendation</h2>
+            <div className=" p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold">Exercise Recommendation</h2>
                 <p className="text-gray-700">{aiAnalysis.exercise}</p>
             </div>
 
             {/* Hobby Section */}
-            <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-semibold">🎨 Hobby Suggestion</h2>
-                <p className="text-gray-700">{aiAnalysis.hobby}</p>
+            <div className="bg-red-300 p-4 rounded-lg shadow-md">
+                <h2 className="text-lg text-white font-semibold">Hobby Suggestion</h2>
+                <p className="text-gray-900">{aiAnalysis.hobby}</p>
             </div>
 
             {/* Entertainment Section */}
-            <div className="bg-purple-100 p-4 rounded-lg shadow-md">
-                <h2 className="text-lg font-semibold">🎬 Entertainment Suggestion</h2>
+            <div className=" p-4 rounded-lg shadow-md">
+                <h2 className="text-lg font-semibold">Entertainment Suggestion</h2>
                 <p className="text-gray-700">{aiAnalysis.entertainment}</p>
             </div>
             </div>
