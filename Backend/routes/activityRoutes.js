@@ -15,6 +15,11 @@ router.post("/", authMiddleware, async (req, res) => {
     console.log("Received Body:", req.body);
     console.log("Extracted userId:", userId);
 
+    // const parsedDate = new Date(date); 
+    // if (isNaN(parsedDate.getTime())) {
+    //     return res.status(400).json({ msg: "Invalid date format" });
+    // }
+
     const newActivity = new Activity({
       userId,
       activityType,
@@ -94,7 +99,7 @@ router.get("/:month", authMiddleware, async (req, res) => {
     const activities = await Activity.find({
       userId,
       date: { $gte: startOfMonth.toISOString(), $lte: endOfMonth.toISOString() }
-    });
+    }).sort({ date: -1 });;
 
     res.json(activities || []);
   } catch (error) {
