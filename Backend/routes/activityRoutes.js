@@ -9,7 +9,7 @@ router.post("/", authMiddleware, async (req, res) => {
   try {
     console.log("Starting Activity Creation...");
     
-    const userId = req.user; // Ensure correct extraction
+    const userId = req.user.userId; // Ensure correct extraction
     const { activityType, duration, distance, date } = req.body;
 
     console.log("Received Body:", req.body);
@@ -130,7 +130,16 @@ router.get("/:month", authMiddleware, async (req, res) => {
 router.patch("/:id/complete", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: "Invalid activity ID" });
+    }
+    
     const activity = await Activity.findByIdAndUpdate(id, { completed: true }, { new: true });
+    
+    if (!activity) {
+      return res.status(404).json({ msg: "Activity not found" });
+    }
+
     res.json(activity);
   } catch (error) {
     console.error("Mark Activity Completed Error:", error.message);

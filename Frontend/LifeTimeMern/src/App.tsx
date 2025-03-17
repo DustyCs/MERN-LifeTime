@@ -8,6 +8,7 @@ import Schedule from './pages/Schedule';
 import AuthPage from './pages/Access';
 import Homepage from './pages/HomePage';
 import Activity from './pages/Activity';
+import Performance from './pages/Performance';
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
         <Route path="/access" element={<AuthPage />}  />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/activity_list" element={<Activity />} /> 
-        <Route path="/performance" element={<h1>Home</h1>} />
+        <Route path="/performance" element={<Performance/>} />
         <Route path="/monthly_review" element={<h1>Home</h1>} />
         <Route path="/life_overview" element={<h1>Home</h1>} />
         <Route path="*"  element={<NotFound />} />
