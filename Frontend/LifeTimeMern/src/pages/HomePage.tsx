@@ -43,9 +43,18 @@ const Homepage = () => {
   const [aiReviewFetched, setAiReviewFetched] = useState(false);
 
   useEffect(() => {
-    fetchSchedule();
-    fetchActivities();
-    fetchHealthData();
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchSchedule();
+      fetchActivities();
+      fetchHealthData();
+    } else {
+      // Clear state if user is not logged in
+      setSchedule([]);
+      setActivities([]);
+      setHealthData(null);
+      setAiAnalysis(null);
+    }
   }, []); // Runs only once on mount
   
   useEffect(() => {
