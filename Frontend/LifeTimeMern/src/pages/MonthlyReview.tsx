@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api/api';
 import { useParams } from 'react-router-dom';
 
+interface ReviewData {
+  health: string;
+  exercise: string;
+  hobby: string;
+  entertainment: string;
+}
+
 export default function MonthlyReview() {
-  const { month } = useParams();
-  const [reviewData, setReviewData] = useState(null);
+  const { month } = useParams<{ month: string }>();
+  const [reviewData, setReviewData] = useState<ReviewData | null>(null);
 
   useEffect(() => {
     fetchReviewData();
@@ -19,7 +26,7 @@ export default function MonthlyReview() {
     }
   };
 
-  const formatMonth = (monthString) => {
+  const formatMonth = (monthString: string) => {
     const date = new Date();
     const year = date.getFullYear();
     return `${monthString.charAt(0).toUpperCase() + monthString.slice(1)} ${year}`;
@@ -28,7 +35,7 @@ export default function MonthlyReview() {
   return (
     <main className="p-4 w-full mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-4xl font-bold">Monthly Review for {formatMonth(month)}</h3>
+        <h3 className="text-4xl font-bold">Monthly Review for {formatMonth(month || '')}</h3>
       </div>
       {reviewData ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

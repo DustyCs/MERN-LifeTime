@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+import { Calendar, momentLocalizer, ToolbarProps, Event } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import API from '../api/api';
@@ -8,8 +8,21 @@ import Button from '../components/ui/Button';
 
 const localizer = momentLocalizer(moment);
 
+interface ScheduleEvent extends Event {
+  title: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
+}
+
+interface ScheduleData {
+  _id: string;
+  title: string;
+  date: string;
+}
+
 export default function Schedule() {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [feedback, setFeedback] = useState('Your schedules are clear, create a new one!');
@@ -24,7 +37,7 @@ export default function Schedule() {
       if (response.data.length === 0) {
         setFeedback("Your schedules are clear, create a new one!");
       } else {
-        const schedules = response.data.map(schedule => ({
+        const schedules = response.data.map((schedule: ScheduleData) => ({
           title: schedule.title,
           start: new Date(schedule.date),
           end: new Date(schedule.date),
@@ -38,7 +51,7 @@ export default function Schedule() {
     }
   };
 
-  const generateFeedback = async (scheduleData) => {
+  const generateFeedback = async (scheduleData: ScheduleData[]) => {
     try {
       const response = await API.post('/gemini', { prompt: 'Give feedback about my schedules for the month.', data: scheduleData });
       setFeedback(response.data || "Your schedules are clear, create a new one!");
@@ -55,7 +68,7 @@ export default function Schedule() {
     setCurrentDate(moment(currentDate).subtract(1, 'months').toDate());
   };
 
-  const CustomToolbar = (toolbar) => {
+  const CustomToolbar: React.FC<ToolbarProps<ScheduleEvent, object>> = (toolbar) => {
     return (
       <div className="rbc-toolbar">
         <span className="rbc-toolbar-label">{toolbar.label}</span>
@@ -85,8 +98,10 @@ export default function Schedule() {
         endAccessor="end"
         style={{ height: 700 }}
         date={currentDate}
-        onNavigate={date => setCurrentDate(date)
-        }
+        onNavigate={date => setCurrentDate(date)}
+        components={{
+          toolbar: CustomToolbar,
+        }}
       />
       <div className="flex justify-between mt-4">
         <Button onClick={handlePrevMonth}>Previous Month</Button>

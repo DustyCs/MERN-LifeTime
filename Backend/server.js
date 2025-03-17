@@ -48,6 +48,13 @@ app.use((req, res, next) => {
   next();
 });
 
+if(process.env.NODE_ENV === 'production'){
+  app.use(express.static(path.join(__dirname, "/frontend/LifeTimeMern/dist")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "/frontend/LifeTimeMern/dist/index.html"));
+  });
+}
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected"))

@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import './App.css'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout';
-import Home from './pages/Home';
 import Schedule from './pages/Schedule';
 import AuthPage from './pages/Access';
 import Homepage from './pages/HomePage';

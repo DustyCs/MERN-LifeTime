@@ -1,4 +1,4 @@
-import { WeekSchedule, HealthCharts, AISuggestions, HobbyChill, PopupOverlay }  from "../components/home-sections/sections";
+import { WeekSchedule, HealthCharts, AISuggestions, HobbyChill }  from "../components/home-sections/sections";
 
 export default function Home() {
   return (
