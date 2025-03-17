@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import API from "../../api/api"; // Import your centralized API instance
+import toast, { Toaster } from "react-hot-toast";
 
 interface ModalProps {
   isOpen: boolean;
@@ -16,6 +17,11 @@ export const ScheduleModal = ({ isOpen, onClose, onSuccess }: ModalProps) => {
   const [category, setCategory] = useState("Work");
 
   const handleSubmit = async () => {
+    if (!title || !date || !time || !category) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     try {
       const formattedDate = new Date(`${date}T${time}`).toISOString();
 
@@ -28,8 +34,10 @@ export const ScheduleModal = ({ isOpen, onClose, onSuccess }: ModalProps) => {
 
       onSuccess();
       onClose();
+      toast.success("Schedule created successfully!");
     } catch (error) {
       console.error("Error creating schedule:", error);
+      toast.error("Failed to create schedule. Please try again.");
     }
   };
 
@@ -37,6 +45,7 @@ export const ScheduleModal = ({ isOpen, onClose, onSuccess }: ModalProps) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-[999]">
+      <Toaster />
       <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
         <h2 className="text-lg font-bold">Create Schedule</h2>
         <input 
@@ -99,6 +108,11 @@ export const ActivityModal = ({ isOpen, onClose, onSuccess, activity }: ModalPro
   }, [activity]);
 
   const handleSubmit = async () => {
+    if (!activityType || !duration || !date || !time) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     try {
       const formattedDate = new Date(`${date}T${time}`).toISOString();
 
@@ -120,8 +134,10 @@ export const ActivityModal = ({ isOpen, onClose, onSuccess, activity }: ModalPro
 
       onSuccess();
       onClose();
+      toast.success(activity ? "Activity updated successfully!" : "Activity created successfully!");
     } catch (error) {
       console.error("Error creating/updating activity:", error);
+      toast.error("Failed to create/update activity. Please try again.");
     }
   };
 
@@ -129,6 +145,7 @@ export const ActivityModal = ({ isOpen, onClose, onSuccess, activity }: ModalPro
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+      <Toaster />
       <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
         <h2 className="text-lg font-bold">{activity ? "Edit Activity" : "Create Activity"}</h2>
         <input

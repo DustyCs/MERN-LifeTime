@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import API from "../../api/api";
+import toast, { Toaster } from "react-hot-toast";
 
 const HealthModal = ({ onClose, onSave }) => {
   const [weight, setWeight] = useState("");
@@ -39,7 +40,10 @@ const HealthModal = ({ onClose, onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!bmi) return;
+    if (!bmi) {
+      toast.error("Please enter valid weight and height to calculate BMI.");
+      return;
+    }
   
     const payload = { weight, height, bmi, riskOfSickness: risk };
     console.log("Sending payload:", payload); // 🔍 Check the exact data sent
@@ -48,14 +52,17 @@ const HealthModal = ({ onClose, onSave }) => {
       await API.post("/health", payload, { headers: { "Content-Type": "application/json" } });
       onSave(); // Refresh data
       onClose();
+      toast.success("Health data logged successfully!");
     } catch (error) {
       console.error("Error logging health data:", error);
       console.error("Error response:", error.response?.data); // Log backend error message
+      toast.error("Failed to log health data. Please try again.");
     }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <Toaster />
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-xl font-bold mb-4">Log Health Status</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

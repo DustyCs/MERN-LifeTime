@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -11,6 +13,7 @@ const AuthPage = () => {
   });
   const [error, setError] = useState(""); // State for error messages
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,6 +25,7 @@ const AuthPage = () => {
   
     if (isRegister && formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
   
@@ -46,20 +50,24 @@ const AuthPage = () => {
         if (!isRegister) {
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("token", data.token);
+          setUser(data.user); // Update user state
         }
-        alert(isRegister ? "Registration successful!" : "Login successful!");
-        navigate("/home");
+        toast.success(isRegister ? "Registration successful!" : "Login successful!");
+        navigate("/");
       } else {
         setError(data.msg || "Something went wrong. Please try again.");
+        toast.error(data.msg || "Something went wrong. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
       setError("Failed to connect to the server. Please try again later.");
+      toast.error("Failed to connect to the server. Please try again later.");
     }
   };
 
   return (
     <div className="auth-div lg:w-full flex h-screen items-center justify-center bg-gray-100">
+      <Toaster />
       <div className="bg-white p-8 rounded-lg shadow-md 
                         lg:w-[40rem] lg:h-[30rem] flex flex-col justify-center">
         <h2 className="text-2xl font-bold text-center mb-6 text-red-500">
