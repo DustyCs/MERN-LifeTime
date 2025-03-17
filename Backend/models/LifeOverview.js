@@ -10,6 +10,7 @@ const LifeOverviewSchema = new mongoose.Schema({
   activities: [{ type: mongoose.Schema.Types.ObjectId, ref: "Activity" }],
   schedules: [{ type: mongoose.Schema.Types.ObjectId, ref: "Schedule" }],
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+  healthData: [{ type: mongoose.Schema.Types.ObjectId, ref: "Health" }]
 });
 
 module.exports = mongoose.model("LifeOverview", LifeOverviewSchema);

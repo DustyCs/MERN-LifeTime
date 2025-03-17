@@ -10,6 +10,7 @@ import Homepage from './pages/HomePage';
 import Activity from './pages/Activity';
 import Performance from './pages/Performance';
 import MonthlyReview from './pages/MonthlyReview';
+import LifeOverview from './pages/LifeOverview';
 
 function App() {
   return (
@@ -21,7 +22,7 @@ function App() {
         <Route path="/activity_list" element={<Activity />} /> 
         <Route path="/performance" element={<Performance/>} />
         <Route path="/monthly_review/:month" element={<MonthlyReview/>} />
-        <Route path="/life_overview" element={<h1>Home</h1>} />
+        <Route path="/life_overview/:year" element={<LifeOverview />} />
         <Route path="*"  element={<NotFound />} />
       </Route>
     </Routes>

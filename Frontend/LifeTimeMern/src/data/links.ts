@@ -11,6 +11,11 @@ const getCurrentMonth = () => {
     return date.toLocaleString('default', { month: 'long' }).toLowerCase(); // e.g., "march"
 };
 
+const getCurrentYear = () => {
+    const date = new Date();
+    return date.getFullYear().toString(); // e.g., "2025"
+};
+
 export const Links: NavLink[] = [
     {
         name: "Home",
@@ -35,7 +40,8 @@ export const Links: NavLink[] = [
     },
     {
         name: "Life Overview",
-        path: "/life_overview"
+        path: `/life_overview/${getCurrentYear()}`,
+        showIfLoggedIn: true
     },
     {
         name: "Register/Login",
