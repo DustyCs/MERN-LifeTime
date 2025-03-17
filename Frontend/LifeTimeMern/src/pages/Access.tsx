@@ -30,8 +30,8 @@ const AuthPage = () => {
     }
   
     const endpoint = isRegister
-      ? "http://localhost:5000/api/auth/register"
-      : "http://localhost:5000/api/auth/login";
+      ? `${import.meta.env.VITE_API_BASE_URL}/auth/register`
+      : `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
   
     try {
       const response = await fetch(endpoint, {

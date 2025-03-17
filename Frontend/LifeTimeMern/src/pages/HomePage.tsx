@@ -50,6 +50,9 @@ const Homepage = () => {
   const [showModal, setShowModal] = useState(false);
   const [aiReviewFetched, setAiReviewFetched] = useState(false);
 
+  console.log("Firebase API Key:", import.meta.env.VITE_FIREBASE_API_KEY);
+
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -262,8 +265,6 @@ const Homepage = () => {
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h1 className="text-xl font-bold">Health Status Comparison</h1>
-
-        {console.log("Health Data Debug:", healthData)}
 
         {healthData && (healthData.previous !== undefined || healthData.current !== undefined) ? (
           <div className="h-60">
