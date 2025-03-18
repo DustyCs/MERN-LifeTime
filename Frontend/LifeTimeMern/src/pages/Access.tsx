@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -15,7 +15,7 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -30,8 +30,8 @@ const AuthPage = () => {
     }
   
     const endpoint = isRegister
-      ? "http://localhost:5000/api/auth/register"
-      : "http://localhost:5000/api/auth/login";
+      ? `${import.meta.env.VITE_API_BASE_URL}/auth/register`
+      : `${import.meta.env.VITE_API_BASE_URL}/auth/login`;
   
     try {
       const response = await fetch(endpoint, {

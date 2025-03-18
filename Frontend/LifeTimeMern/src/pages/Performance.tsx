@@ -1,11 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api/api';
-import Button from '../components/ui/Button';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 
+interface Activity {
+  _id: string;
+  activityType: string;
+  description?: string;
+  duration: number;
+  distance?: number;
+  date: string;
+  completed: boolean;
+}
+
+interface HealthData {
+  createdAt: string;
+  weight: number;
+  height: number;
+  bmi: number;
+  riskOfSickness: string;
+}
+
+interface PerformanceData {
+  activities: Activity[];
+  healthData: HealthData[];
+  completedActivities: number;
+  incompleteActivities: number;
+}
+
 export default function Performance() {
-  const [performanceData, setPerformanceData] = useState(null);
+  const [performanceData, setPerformanceData] = useState<PerformanceData | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM format
   const user = localStorage.getItem('token');
 
@@ -17,26 +41,15 @@ export default function Performance() {
 
   const fetchPerformanceData = async () => {
     try {
-      const response = await API.get(`/performance/current-month`);
+      const response = await API.get(`/performance/${currentMonth}`);
       setPerformanceData(response.data);
     } catch (error) {
       console.error('Error fetching performance data:', error);
+      console.log(setCurrentMonth)
     }
   };
 
-  const handleNextMonth = () => {
-    const nextMonth = new Date(currentMonth);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    setCurrentMonth(nextMonth.toISOString().slice(0, 7));
-  };
-
-  const handlePrevMonth = () => {
-    const prevMonth = new Date(currentMonth);
-    prevMonth.setMonth(prevMonth.getMonth() - 1);
-    setCurrentMonth(prevMonth.toISOString().slice(0, 7));
-  };
-
-  const formatMonth = (dateString) => {
+  const formatMonth = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('default', { month: 'long', year: 'numeric' });
   };

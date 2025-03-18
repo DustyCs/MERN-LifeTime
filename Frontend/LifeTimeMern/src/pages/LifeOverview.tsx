@@ -1,12 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api/api';
 import { useParams } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 
+interface Activity {
+  _id: string;
+  activityType: string;
+  description?: string;
+  duration: number;
+  distance?: number;
+  date: string;
+  completed: boolean;
+}
+
+interface Schedule {
+  _id: string;
+  title: string;
+  description?: string;
+  date: string;
+  category: string;
+}
+
+interface HealthData {
+  createdAt: string;
+  weight: number;
+  height: number;
+  bmi: number;
+}
+
+interface Review {
+  _id: string;
+  month: string;
+  analysis: {
+    health: string;
+    exercise: string;
+    hobby: string;
+    entertainment: string;
+  };
+}
+
+interface OverviewData {
+  activities: Activity[];
+  schedules: Schedule[];
+  healthData: HealthData[];
+  reviews: Review[];
+}
+
 export default function LifeOverview() {
-  const { year } = useParams();
-  const [overviewData, setOverviewData] = useState(null);
+  const { year } = useParams<{ year: string }>();
+  const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
 
   useEffect(() => {
     fetchOverviewData();
@@ -21,7 +64,7 @@ export default function LifeOverview() {
     }
   };
 
-  const formatMonth = (monthString) => {
+  const formatMonth = (monthString: string) => {
     return monthString.charAt(0).toUpperCase() + monthString.slice(1);
   };
 

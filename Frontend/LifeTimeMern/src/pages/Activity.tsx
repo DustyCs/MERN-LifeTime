@@ -1,13 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api/api';
 import { ActivityModal } from '../components/modals/ScheduleActivity';
 import Button from '../components/ui/Button';
 
-export default function Activity() {
-  const [activities, setActivities] = useState([]);
+interface Activity {
+  _id: string;
+  activityType: string;
+  description?: string;
+  duration: number;
+  distance?: number;
+  date: string;
+  completed: boolean;
+}
+
+export default function ActivityPage() {
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM format
-  const [editingActivity, setEditingActivity] = useState(null);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
   useEffect(() => {
     fetchActivities();
@@ -34,7 +44,7 @@ export default function Activity() {
     setCurrentMonth(prevMonth.toISOString().slice(0, 7));
   };
 
-  const markAsCompleted = async (id) => {
+  const markAsCompleted = async (id: string) => {
     try {
       await API.patch(`/activities/${id}/complete`);
       fetchActivities();
@@ -43,7 +53,7 @@ export default function Activity() {
     }
   };
 
-  const markAsNonCompleted = async (id) => {
+  const markAsNonCompleted = async (id: string) => {
     try {
       await API.patch(`/activities/${id}/uncomplete`);
       fetchActivities();
@@ -52,7 +62,7 @@ export default function Activity() {
     }
   };
 
-  const editActivity = (activity) => {
+  const editActivity = (activity: Activity) => {
     setEditingActivity(activity);
     setModalOpen(true);
   };
@@ -60,7 +70,7 @@ export default function Activity() {
   const completedActivities = activities.filter(activity => activity.completed);
   const nonCompletedActivities = activities.filter(activity => !activity.completed);
 
-  const formatMonth = (dateString) => {
+  const formatMonth = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('default', { month: 'long', year: 'numeric' });
   };
