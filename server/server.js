@@ -1,3 +1,4 @@
+console.log("Server is attempting to start...");
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -18,23 +19,31 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173", // Local development
-  "https://lifetime-schedules.web.app", // Firebase hosting
+  "https://lifetime-schedules.web.app", // Firebase frontend
+  "https://server-lime-theta-90.vercel.app", // Vercel backend
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.get("/", (req, res) => {
+  console.log("Root route accessed");
+  res.send("Server is running!");
+});
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+// Ensure OPTIONS requests are handled correctly
+app.options("*", cors());
+
+console.log("Environment Variables:");
+console.log("GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "Exists" : "Not Found");
+console.log("JWTKEY:", process.env.JWTKEY ? "Exists" : "Not Found");
+console.log("MONGO_URI:", process.env.MONGODB_URI ? "Exists" : "Not Found");
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -53,12 +62,7 @@ app.use((req, res, next) => {
   next();
 });
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, "../frontend/LifeTimeMern/dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/LifeTimeMern/dist/index.html"));
-  });
-}
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -66,3 +70,5 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.log(err));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = app;
