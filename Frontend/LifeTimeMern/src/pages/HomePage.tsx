@@ -50,9 +50,6 @@ const Homepage = () => {
   const [showModal, setShowModal] = useState(false);
   const [aiReviewFetched, setAiReviewFetched] = useState(false);
 
-  console.log("Firebase API Key:", import.meta.env.VITE_FIREBASE_API_KEY);
-
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {

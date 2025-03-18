@@ -1,7 +1,13 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
+let isConnected = false;
+
 const connectDB = async () => {
+  if (isConnected) {
+    console.log("Using existing database connection");
+    return;
+  }
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
