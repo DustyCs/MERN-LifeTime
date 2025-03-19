@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173", // Local development
   "https://lifetime-schedules.web.app", // Firebase frontend
-  "https://server-lime-theta-90.vercel.app", // Vercel backend
+  "https://mern-lifetime.onrender.com" // onreender backend
 ];
 
 app.get("/", (req, res) => {
@@ -31,12 +31,8 @@ app.get("/", (req, res) => {
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
-// Ensure OPTIONS requests are handled correctly
-app.options("*", cors());
 
 console.log("Environment Variables:");
 console.log("GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "Exists" : "Not Found");

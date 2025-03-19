@@ -41,7 +41,7 @@ export default function Performance() {
 
   const fetchPerformanceData = async () => {
     try {
-      const response = await API.get(`/performance/${currentMonth}`);
+      const response = await API.get(`/performance/current-month`);
       setPerformanceData(response.data);
     } catch (error) {
       console.error('Error fetching performance data:', error);

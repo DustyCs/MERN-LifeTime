@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../Context/AuthContext";
+import Footer from "../components/Footer";
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -47,12 +48,30 @@ const AuthPage = () => {
   
       const data = await response.json();
       if (response.ok) {
-        if (!isRegister) {
+        if (isRegister) {
+          // If registration is successful, automatically log in
+          const loginResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ email: formData.email, password: formData.password }),
+          });
+  
+          const loginData = await loginResponse.json();
+          if (loginResponse.ok) {
+            localStorage.setItem("user", JSON.stringify(loginData.user));
+            localStorage.setItem("token", loginData.token);
+            setUser(loginData.user); // Update user state
+            toast.success("Registration successful! Logged in automatically.");
+          } else {
+            toast.error(loginData.msg || "Login failed after registration. Please log in manually.");
+          }
+        } else {
           localStorage.setItem("user", JSON.stringify(data.user));
           localStorage.setItem("token", data.token);
           setUser(data.user); // Update user state
+          toast.success("Login successful!");
         }
-        toast.success(isRegister ? "Registration successful!" : "Login successful!");
         navigate("/");
       } else {
         setError(data.msg || "Something went wrong. Please try again.");
@@ -66,7 +85,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="auth-div lg:w-full flex h-screen items-center justify-center bg-gray-100">
+    <div className="auth-div flex-col lg:w-full flex h-screen items-center justify-center bg-gray-100">
       <Toaster />
       <div className="bg-white p-8 rounded-lg shadow-md 
                         lg:w-[40rem] lg:h-[30rem] flex flex-col justify-center">
@@ -125,7 +144,9 @@ const AuthPage = () => {
           </button>
         </p>
       </div>
+      <Footer />
     </div>
+    
   );
 };
 
