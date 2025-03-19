@@ -8,6 +8,8 @@ const router = express.Router();
 // Get performance data
 router.get("/", authMiddleware, async (req, res) => {
   try {
+    const userId = req.user
+
     const [completedActivities, incompleteActivities] = await Promise.all([
       Activity.countDocuments({ userId: req.user, completed: true }),
       Activity.countDocuments({ userId: req.user, completed: false })
