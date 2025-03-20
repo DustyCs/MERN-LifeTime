@@ -11,6 +11,7 @@ import MonthlyReview from './pages/MonthlyReview';
 import LifeOverview from './pages/LifeOverview';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './Context/AuthContext';
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/performance" element={<Performance/>} />
           <Route path="/monthly_review/:month" element={<MonthlyReview/>} />
           <Route path="/life_overview/:year" element={<LifeOverview />} />
+          <Route path="/terms_of_service" element={<TermsAndConditions/>}/>
           <Route path="*"  element={<NotFound />} />
         </Route>
       </Routes>

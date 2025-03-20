@@ -4,7 +4,7 @@ export default function Footer() {
         <p>LifeTime © 2023</p>
         <p>All rights reserved.</p>
         <p>
-           By using this website, you agree to our <a href="#" className="font-bold text-blue-500">Privacy Policy</a> & <a href="#" className="font-bold text-blue-500" >Terms of Service</a>
+           By using this website, you agree to our <a href="/terms_of_service" className="font-bold text-blue-500">Privacy Policy</a> & <a href="/terms_of_service" className="font-bold text-blue-500" >Terms of Service</a>
         </p>
     </footer>
   )
