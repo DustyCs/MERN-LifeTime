@@ -62,7 +62,7 @@ router.post("/", authMiddleware, async (req, res) => {
 // Get all activities
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const userId = req.user; // Ensure consistent extraction
+    const userId = req.user.userId; // Ensure consistent extraction
     console.log("Fetching activities for user:", userId);
 
     const activities = await Activity.find({ userId });
@@ -87,7 +87,7 @@ router.get("/current-week", authMiddleware, async (req, res) => {
     console.log("Fetching activities for user:", req.user, "from:", startOfWeek, "to:", endOfWeek);
 
     const activities = await Activity.find({
-      userId: req.user,  // Ensure activities belong to the authenticated user
+      userId: req.user.userId,  // Ensure activities belong to the authenticated user
       date: {
         $gte: startOfWeek,
         $lte: endOfWeek,
