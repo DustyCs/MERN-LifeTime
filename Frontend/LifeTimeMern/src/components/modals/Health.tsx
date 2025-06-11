@@ -66,9 +66,9 @@ const HealthModal: React.FC<HealthModalProps> = ({ onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center ">
       <Toaster />
-      <div className="bg-white p-6 rounded-lg w-96">
+      <div className="bg-white p-6 rounded-lg w-96 border-2 border-black">
         <h2 className="text-xl font-bold mb-4">Log Health Status</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <label>

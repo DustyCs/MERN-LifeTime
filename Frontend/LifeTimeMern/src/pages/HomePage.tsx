@@ -113,19 +113,29 @@ const Homepage = () => {
       setSchedule([]);
     }
   };
-
   const fetchActivities = async () => {
     try {
-      const response = await API.get("/activities/current-week");
-      if (Array.isArray(response.data)) {
-        setActivities(response.data);
+      const response = await fetch("https://mern-lifetime.onrender.com/api/activities/current-week", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add auth token if needed
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = await response.json();
+      console.log("✅ Fetched activities:", data);
+  
+      // Ensure data is an array before updating state
+      if (Array.isArray(data)) {
+        setActivities(data);
       } else {
-        console.error("Fetched activities data is not an array", response.data);
-        setActivities([]);
+        console.error("❌ Error: Expected an array but got", data);
+        setActivities([]); // Fallback to empty array
       }
     } catch (error) {
-      console.error("Error fetching activities:", error);
-      setActivities([]);
+      console.error("🔥 Error fetching activities:", error);
+      setActivities([]); // Handle errors gracefully
     }
   };
 
@@ -225,7 +235,38 @@ const Homepage = () => {
 
             const formattedISODate = currentDate.toISOString().split("T")[0];
             const daySchedule = schedule.filter((s) => s.date === formattedISODate);
-            const dayActivities = activities.filter((a) => a.date.split("T")[0] === formattedISODate);
+            // const dayActivities = activities.filter((a) => a.date.split("T")[0] === formattedISODate);
+            // const dayActivities = activities.filter((a) => {
+            //   const activityDate = new Date(a.date).toISOString().split("T")[0]; // Extract only the date part
+            //   console.log(`Comparing ${activityDate} with ${formattedISODate}`);
+            //   console.log("Activity Dates:", activities.map((a) => a.date));
+            //   return activityDate === formattedISODate; // Compare the date parts
+            // });
+
+            // const dayActivities = activities.filter((a) => {
+            //   // Convert activity date to local date string (YYYY-MM-DD)
+            //   const activityDate = new Date(a.date).toISOString().split("T")[0];
+            //   console.log(`Comparing ${activityDate} with ${formattedISODate}`);
+            //   return activityDate === formattedISODate; // Compare the date parts
+            // });
+            // const dayActivities = activities.filter((a) => {
+            //   // Convert activity date to local date string (YYYY-MM-DD)
+            //   const activityDate = new Date(a.date).toISOString().split("T")[0];
+            //   console.log(`Comparing ${activityDate} with ${formattedISODate}`);
+            //   return activityDate === formattedISODate; // Compare the date parts
+            // });
+            const dayActivities = activities.filter((a) => {
+              // Convert activity date to UTC date string (YYYY-MM-DD)
+              const activityDate = new Date(a.date).toISOString().split("T")[0];
+            
+              // Normalize currentDate to UTC and format as YYYY-MM-DD
+              const utcDate = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000)
+                .toISOString()
+                .split("T")[0];
+            
+              console.log(`Comparing activityDate: ${activityDate} with utcDate: ${utcDate}`);
+              return activityDate === utcDate; // Compare the normalized dates
+            });
 
             return (
               <Card key={formattedISODate}>

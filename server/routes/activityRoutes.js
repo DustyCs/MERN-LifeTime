@@ -15,11 +15,6 @@ router.post("/", authMiddleware, async (req, res) => {
     console.log("Received Body:", req.body);
     console.log("Extracted userId:", userId);
 
-    // const parsedDate = new Date(date); 
-    // if (isNaN(parsedDate.getTime())) {
-    //     return res.status(400).json({ msg: "Invalid date format" });
-    // }
-
     const newActivity = new Activity({
       userId,
       activityType,
@@ -36,28 +31,6 @@ router.post("/", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to create activity" });
   }
 });
-
-// in case it doesnt work
-// router.post("/", authMiddleware, async (req, res) => {
-//   try {
-//     const userId = req.user.userId; // Ensure correct extraction
-//     const { activityType, duration, distance, date } = req.body;
-
-//     const newActivity = new Activity({
-//       userId,
-//       activityType,
-//       duration,
-//       distance,
-//       date: new Date(date) // Ensure the date is stored as a Date object
-//     });
-
-//     await newActivity.save();
-//     res.json(newActivity);
-//   } catch (error) {
-//     console.error("Create Activity Error:", error.message);
-//     res.status(500).json({ msg: "Server Error - attempting to create activity" });
-//   }
-// });
 
 // Get all activities
 router.get("/", authMiddleware, async (req, res) => {
@@ -177,8 +150,5 @@ router.put("/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ msg: "Server Error - attempting to update activity" });
   }
 });
-
-module.exports = router;
-
 
 module.exports = router;

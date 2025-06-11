@@ -31,7 +31,7 @@ export default function ActivityPage() {
       console.error('Error fetching activities:', error);
     }
   };
-
+ 
   const handleNextMonth = () => {
     const nextMonth = new Date(currentMonth);
     nextMonth.setMonth(nextMonth.getMonth() + 1);

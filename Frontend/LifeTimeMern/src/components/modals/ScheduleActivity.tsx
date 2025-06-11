@@ -44,9 +44,9 @@ export const ScheduleModal = ({ isOpen, onClose, onSuccess }: ModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-[999]">
+    <div className="fixed inset-0 flex items-center justify-center z-[999]">
       <Toaster />
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+      <div className="bg-white p-6 rounded-lg w-96 shadow-lg border-2 border-black">
         <h2 className="text-lg font-bold">Create Schedule</h2>
         <input 
           type="text" placeholder="Title" className="w-full p-2 border mt-2" 
@@ -144,9 +144,9 @@ export const ActivityModal = ({ isOpen, onClose, onSuccess, activity }: ModalPro
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center">
       <Toaster />
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+      <div className="bg-white p-6 rounded-lg w-96 shadow-lg border-2 border-black">
         <h2 className="text-lg font-bold">{activity ? "Edit Activity" : "Create Activity"}</h2>
         <input
           type="text"
