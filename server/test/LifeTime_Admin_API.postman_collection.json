@@ -1,0 +1,294 @@
+{
+  "info": {
+    "name": "LifeTime Admin API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Admin Overview",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/overview",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "overview"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/users",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get User By ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/users/{{userId}}",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "{{userId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete User",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/users/{{userId}}",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "{{userId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Toggle User Active",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/users/{{userId}}/toggle-active",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "{{userId}}",
+            "toggle-active"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Activities",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/activities",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "activities"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Activities Filtered",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/activities?userId={{userId}}&type=Run&date=2024-01-01",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "activities?userId={{userId}}&type=Run&date=2024-01-01"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Toggle Activity Completion",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/activities/{{activityId}}/toggle-complete",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "activities",
+            "{{activityId}}",
+            "toggle-complete"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Activity",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/activities/{{activityId}}",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "activities",
+            "{{activityId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Schedules",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/schedules",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "schedules"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Event From Schedule",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/schedules/{{scheduleId}}/event/{{eventId}}",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "schedules",
+            "{{scheduleId}}",
+            "event",
+            "{{eventId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Helpful Queries",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/admin/queries",
+          "host": [
+            "localhost:5000"
+          ],
+          "path": [
+            "admin",
+            "queries"
+          ]
+        }
+      }
+    }
+  ]
+}
