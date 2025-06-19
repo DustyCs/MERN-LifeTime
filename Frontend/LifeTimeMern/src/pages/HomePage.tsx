@@ -9,6 +9,8 @@ import { ScheduleModal, ActivityModal } from "../components/modals/ScheduleActiv
 import HealthModal from "../components/modals/Health";
 import axios from "axios";
 
+import { useAdminContext } from "../Context/AdminContext";
+
 interface Schedule {
   _id: string;
   title: string;
@@ -49,6 +51,7 @@ const Homepage = () => {
   const [isActivityModalOpen, setActivityModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [aiReviewFetched, setAiReviewFetched] = useState(false);
+  const { isAdmin , setIsAdmin } = useAdminContext();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -74,6 +77,24 @@ const Homepage = () => {
       setAiReviewFetched(true); // Prevent further calls
     }
   }, [healthData, activities, schedule, aiReviewFetched]);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+
+    if (user && JSON.parse(user).isAdmin) {
+      console.log("User is admin");
+      setIsAdmin(true);
+    }
+
+    console.log(user)
+
+    return () => {};
+  }, []);
+
+  useEffect(() => {
+    // infinite logs
+    console.log("user is an admin?", isAdmin);
+  })
 
   const fetchSchedule = async () => {
     try {
@@ -204,13 +225,13 @@ const Homepage = () => {
         }
       );
 
-      console.log("✅ AI Review Fetched:", response.data);
+      console.log("AI Review Fetched:", response.data);
 
       // 🔥 Ensure response contains the expected structure before updating state
       if (response.data && response.data.analysis) {
         setAiAnalysis(response.data.analysis);
       } else {
-        console.warn("⚠️ AI Analysis data is missing in the response.");
+        console.warn("AI Analysis data is missing in the response.");
         setAiAnalysis(null);
       }
     } catch (error) {
