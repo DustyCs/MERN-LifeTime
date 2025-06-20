@@ -15,6 +15,10 @@ import { AdminRoleProvider } from "./Context/AdminContext";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RequireAdmin from "./routes/restrict/RequireAdmin";
 import AdminOverview from "./feature/admin/pages/AdminOverview";
+import AdminUsers from "./feature/admin/pages/AdminUsers";
+import AdminSchedules from "./feature/admin/pages/AdminSchedules";
+import AdminActivities from "./feature/admin/pages/AdminActivities";
+import AdminQueries from "./feature/admin/pages/AdminQueries";
 
 // App Routes shouldn't have been here and instead in its own file
 
@@ -37,6 +41,10 @@ function App() {
             {/* Admin Only */}
             <Route element={ <RequireAdmin /> }>
               <Route path="/admin" element={<AdminOverview />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/schedules" element={<AdminSchedules />} />
+              <Route path="/admin/activities" element={<AdminActivities />} />
+              <Route path="/admin/queries" element={<AdminQueries />} />
             </Route>
 
             <Route path="*"  element={<NotFound />} />
