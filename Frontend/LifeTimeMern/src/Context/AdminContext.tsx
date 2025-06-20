@@ -3,27 +3,33 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 interface RoleContextType {
     isAdmin: boolean;
     setIsAdmin: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoading: boolean;
 }
 
 const AuthContext = createContext<RoleContextType | undefined>(undefined);
 
 export const AdminRoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
 
-    try{
-      const user = JSON.parse(storedUser!);
-      setIsAdmin(user.isAdmin);
-    } catch (error) {
-      console.error('Error parsing user object:', error);
+    if (storedUser){
+      try{
+        const parsed = JSON.parse(storedUser);
+        setIsAdmin(!!parsed.isAdmin);
+      } catch (error) {
+        console.error('Error parsing user object:', error);
+      }
     }
+
+    setIsLoading(false);
   
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAdmin, setIsAdmin }}>
+    <AuthContext.Provider value={{ isAdmin, setIsAdmin, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
