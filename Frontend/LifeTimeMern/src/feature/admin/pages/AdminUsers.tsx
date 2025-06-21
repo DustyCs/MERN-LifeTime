@@ -12,16 +12,17 @@ export default function AdminUsers() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    getUsers(query, page).then((data) => {
-      setUsers(data);
-      setFilteredUsers(data);
-      setTotalPages(data.totalPages);
-    }).catch((error) => {
-      console.error('Error fetching users:', error);
-    }).finally(() => {
-      setLoading(false);
-    })
-  }, []);
+    // getUsers(query, page).then((data) => {
+    //   setUsers(data.users);
+    //   setFilteredUsers(data.users);
+    //   setTotalPages(data.totalPages);
+    // }).catch((error) => {
+    //   console.error('Error fetching users:', error);
+    // }).finally(() => {
+    //   setLoading(false);
+    // })
+    fetchUsers();
+  }, [page]);
 
   useEffect(() => {
       const q = query.toLowerCase();
@@ -34,7 +35,8 @@ export default function AdminUsers() {
     setLoading(true);
     getUsers(query, page).then((data) => {
       setUsers(data.users);
-      setFilteredUsers(data.totalPages);
+      setFilteredUsers(data.users);
+      setTotalPages(data.totalPages);
     }).catch((error) => {
       console.error('Error fetching users:', error);
     }).finally(() => {
@@ -67,7 +69,7 @@ export default function AdminUsers() {
         value={query}
         onChange={(e) => { 
           setQuery(e.target.value)
-          setPage(1)
+          setPage(1) // reset page when search query changes // seems to like its being overwritten
         }}
       />
         <ul>

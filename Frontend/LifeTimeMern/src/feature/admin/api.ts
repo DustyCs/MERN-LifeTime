@@ -31,7 +31,7 @@ export const getUsers = async (query: string, page: number) => {
 
 export const getUser = async (userId: string) => {
     try {
-        const response = await API.get(`/admin/user/${userId}`);
+        const response = await API.get(`/admin/users/${userId}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching user:', error);
@@ -40,7 +40,7 @@ export const getUser = async (userId: string) => {
 
 export const deleteUser = async (userId: string) => {
     try {
-        const response = await API.delete(`/admin/user/${userId}`);
+        const response = await API.delete(`/admin/users/${userId}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting user:', error);
@@ -49,7 +49,7 @@ export const deleteUser = async (userId: string) => {
 
 export const setActiveUser = async (userId: string) => {
     try {
-        const response = await API.patch(`/admin/user/${userId}/toggle-active`);
+        const response = await API.patch(`/admin/users/${userId}/toggle-active`);
         return response.data;
     } catch (error) {
         console.error('Error activating user:', error);
@@ -58,7 +58,7 @@ export const setActiveUser = async (userId: string) => {
 
 export const setUserAdmin = async (userId: string) => {
     try {
-        const response = await API.patch(`/admin/user/${userId}/toggle-admin`);
+        const response = await API.patch(`/admin/users/${userId}/toggle-admin`);
         return response.data;
     } catch (error) {
         console.error('Error setting user admin status:', error);

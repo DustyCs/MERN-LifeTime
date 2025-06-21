@@ -36,7 +36,6 @@ router.get("/overview", authMiddleware, adminMiddleware, async (req, res) => {
 
 // 👥 USER MANAGEMENT
 router.get("/users", authMiddleware, adminMiddleware, async (req, res) => {
-  // const users = await User.find().select("-password");
   const { query = "", page = 1, limit = 10 } = req.query;
   const q = query.toLowerCase(); // case-insensitive search
 
@@ -54,7 +53,11 @@ router.get("/users", authMiddleware, adminMiddleware, async (req, res) => {
 
   const total = await User.countDocuments(filter);
 
-  res.json(users, { totalPages: Math.ceil(total / limit), total });
+  res.status(200).json({
+    users,
+    totalPages: Math.ceil(total / limit),
+    total
+  });
 });
 
 router.get("/users/:id", authMiddleware, adminMiddleware, async (req, res) => {
@@ -77,6 +80,7 @@ router.patch("/users/:id/toggle-active", authMiddleware, adminMiddleware, async 
 });
 
 router.patch("/users/:id/toggle-admin", authMiddleware, adminMiddleware, async (req, res) => {
+  console.log("Toggle admin route called", req.params.id);
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ message: "User not found" });
   user.isAdmin = !user.isAdmin;
