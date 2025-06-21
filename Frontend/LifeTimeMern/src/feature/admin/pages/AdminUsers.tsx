@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getUsers } from "../api";
+import { deleteUser, getUsers, setUserAdmin } from "../api";
+import { Spinner } from "../../../components/Spinner";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -7,10 +8,14 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
-    getUsers().then((data) => {
+    getUsers(query, page).then((data) => {
       setUsers(data);
       setFilteredUsers(data);
+      setTotalPages(data.totalPages);
     }).catch((error) => {
       console.error('Error fetching users:', error);
     }).finally(() => {
@@ -25,8 +30,32 @@ export default function AdminUsers() {
       );
   }, [query, users]);
 
+  const fetchUsers = () => {
+    setLoading(true);
+    getUsers(query, page).then((data) => {
+      setUsers(data.users);
+      setFilteredUsers(data.totalPages);
+    }).catch((error) => {
+      console.error('Error fetching users:', error);
+    }).finally(() => {
+      setLoading(false);
+    })
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Delete this user?")) {
+      deleteUser(id);
+      fetchUsers();
+    }
+  };
+
+  const handleToggleAdmin = async (id: string) => {
+    setUserAdmin(id);
+    fetchUsers();
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (
@@ -36,22 +65,30 @@ export default function AdminUsers() {
         type="text"
         placeholder="Search by name or email"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => { 
+          setQuery(e.target.value)
+          setPage(1)
+        }}
       />
-      <ul>
-        {/* {users.map((user: any) => (
-          <li key={user._id}>
-            {user.name} - {user.email}
-          </li>
-        ))} */}
-        {
-          filteredUsers.map((user: any) => (
-            <li key={user._id}>
-              {user.name} - {user.email}
-            </li>
-          ))
-        }
-      </ul>
+        <ul>
+          {filteredUsers.map((user: any) => (
+              <li key={user._id}>
+                {user.name} - {user.email} - {user.isAdmin ? "Admin" : "User"}
+                <button onClick={() => handleToggleAdmin(user._id)}>{user.isAdmin ? "Remove Admin" : "Make Admin" }</button>
+                <button onClick={() => handleDelete(user._id)}>Delete</button>
+              </li>
+            ))
+          }
+        </ul>
+        <div>
+          Page {page} of {totalPages}
+              <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                Prev
+              </button>
+              <button disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+                Next
+              </button>
+        </div>
     </div>
   );
 }

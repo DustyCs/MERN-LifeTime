@@ -36,8 +36,25 @@ router.get("/overview", authMiddleware, adminMiddleware, async (req, res) => {
 
 // 👥 USER MANAGEMENT
 router.get("/users", authMiddleware, adminMiddleware, async (req, res) => {
-  const users = await User.find().select("-password");
-  res.json(users);
+  // const users = await User.find().select("-password");
+  const { query = "", page = 1, limit = 10 } = req.query;
+  const q = query.toLowerCase(); // case-insensitive search
+
+  const filter = {
+    $or: [
+      { name: { $regex: q, $options: "i" } },
+      { email: { $regex: q, $options: "i" } },
+    ]
+  }
+
+  const users = await User.find(filter)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .select("-password");
+
+  const total = await User.countDocuments(filter);
+
+  res.json(users, { totalPages: Math.ceil(total / limit), total });
 });
 
 router.get("/users/:id", authMiddleware, adminMiddleware, async (req, res) => {
@@ -57,6 +74,14 @@ router.patch("/users/:id/toggle-active", authMiddleware, adminMiddleware, async 
   user.isActive = !user.isActive; // there's no active field
   await user.save();
   res.json({ message: `User is now ${user.isActive ? "active" : "inactive"}` });
+});
+
+router.patch("/users/:id/toggle-admin", authMiddleware, adminMiddleware, async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  user.isAdmin = !user.isAdmin;
+  await user.save();
+  res.json({ message: `User is now ${user.isAdmin ? "admin" : "user"}` });
 });
 
 // 📅 SCHEDULE MANAGEMENT
@@ -98,6 +123,19 @@ router.patch("/activities/:id/toggle-complete", authMiddleware, adminMiddleware,
 router.delete("/activities/:id", authMiddleware, adminMiddleware, async (req, res) => {
   await Activity.findByIdAndDelete(req.params.id);
   res.json({ message: "Activity deleted" });
+});
+
+// New
+
+router.get("/completed-activities", authMiddleware, adminMiddleware, async (req, res) => {
+  const activities = await Activity.find({ completed: true });
+  res.json(activities);
+});
+
+
+router.get("/incompleted-activities", authMiddleware, adminMiddleware, async (req, res) => {
+  const activities = await Activity.find({ completed: false });
+  res.json(activities);
 });
 
 // 📊 ANALYTICS

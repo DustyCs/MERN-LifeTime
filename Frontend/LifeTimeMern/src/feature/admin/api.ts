@@ -11,9 +11,18 @@ export const getOverview = async () => {
 
 // Users
 
-export const getUsers = async () => {
+// export const getUsers = async () => {
+//     try {
+//         const response = await API.get('/admin/users');
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching users:', error);
+//     }
+// }
+
+export const getUsers = async (query: string, page: number) => {
     try {
-        const response = await API.get('/admin/users');
+        const response = await API.get('/admin/users', { params: { query, page } });
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -44,6 +53,15 @@ export const setActiveUser = async (userId: string) => {
         return response.data;
     } catch (error) {
         console.error('Error activating user:', error);
+    }
+}
+
+export const setUserAdmin = async (userId: string) => {
+    try {
+        const response = await API.patch(`/admin/user/${userId}/toggle-admin`);
+        return response.data;
+    } catch (error) {
+        console.error('Error setting user admin status:', error);
     }
 }
 
