@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getActivities } from "../api";
 
-
 export default function AdminActivities() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +32,7 @@ export default function AdminActivities() {
 //       </ul>
 //     </div>
 //   );
+
 return (
     <div>
       <h1>Admin Activities</h1>
@@ -63,7 +63,7 @@ return (
         <div>Loading activities...</div>
       ) : (
         <ul>
-          {activities.map((act) => (
+          {activities.map((act: any) => (
             <li key={act._id}>
               {act.activityType} | {act.date} |{" "}
               {act.completed ? "Completed" : "Incomplete"}

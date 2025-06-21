@@ -9,6 +9,8 @@ export const getOverview = async () => {
     }
 }
 
+// Users
+
 export const getUsers = async () => {
     try {
         const response = await API.get('/admin/users');
@@ -17,6 +19,35 @@ export const getUsers = async () => {
         console.error('Error fetching users:', error);
     }
 }
+
+export const getUser = async (userId: string) => {
+    try {
+        const response = await API.get(`/admin/user/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user:', error);
+    }
+}
+
+export const deleteUser = async (userId: string) => {
+    try {
+        const response = await API.delete(`/admin/user/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting user:', error);
+    }
+}
+
+export const setActiveUser = async (userId: string) => {
+    try {
+        const response = await API.patch(`/admin/user/${userId}/toggle-active`);
+        return response.data;
+    } catch (error) {
+        console.error('Error activating user:', error);
+    }
+}
+
+// Schedules
 
 export const getSchedules = async () => {
     try {
@@ -27,6 +58,17 @@ export const getSchedules = async () => {
     }
 }
 
+export const deleteSchedule = async (scheduleId: string) => {
+    try {
+        const response = await API.delete(`/admin/schedules//event/${scheduleId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting schedule:', error);
+    }
+}
+
+// Activities
+
 export const getActivities = async (filters: any) => {
     try {
         const response = await API.get('/admin/activities', { params: filters });
@@ -36,6 +78,26 @@ export const getActivities = async (filters: any) => {
     }
 }
 
+export const toggleActivityStatus = async (activityId: string) => {
+    try {
+        const response = await API.patch(`/admin/activities/${activityId}/toggle-complete`);
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling activity status:', error);
+    }
+}
+
+export const deleteActivity = async (activityId: string) => {
+    try {
+        const response = await API.delete(`/admin/activities/${activityId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting activity:', error);
+    }
+}
+
+// Analytics
+
 export const adminQueries = async () => {
     try {
         const response = await API.get('/admin/queries');
@@ -44,3 +106,4 @@ export const adminQueries = async () => {
         console.error('Error fetching queries:', error);
     }
 }
+
