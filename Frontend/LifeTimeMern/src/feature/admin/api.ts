@@ -38,6 +38,15 @@ export const getUser = async (userId: string) => {
     }
 }
 
+export const getUserDetails = async (userId: string) => {
+    try {
+        const response = await API.get(`/admin/users/${userId}/details`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+    }
+}
+
 export const deleteUser = async (userId: string) => {
     try {
         const response = await API.delete(`/admin/users/${userId}`);

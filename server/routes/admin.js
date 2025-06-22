@@ -1,6 +1,7 @@
 // routes/admin.js
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 
 const adminMiddleware = require("../middleware/adminMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -8,6 +9,9 @@ const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const Activity = require("../models/Activity");
 const Schedule = require("../models/Schedule");
+const Review = require("../models/Review");
+const Health = require("../models/Health");
+
 
 // 📊 OVERVIEW
 router.get("/overview", authMiddleware, adminMiddleware, async (req, res) => {
@@ -88,6 +92,46 @@ router.patch("/users/:id/toggle-admin", authMiddleware, adminMiddleware, async (
   res.json({ message: `User is now ${user.isAdmin ? "admin" : "user"}` });
 });
 
+router.get("/users/:id/details", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const objectIdUserId = new mongoose.Types.ObjectId(userId); 
+
+    const [user, activities, schedules, healthData, reviews] = await Promise.all([
+      User.findById(userId).select("-password"),
+      Activity.find({ userId: objectIdUserId }),
+      Schedule.find({ userId: objectIdUserId }),
+      Health.find({ userId: objectIdUserId }),
+      Review.find({ userId: objectIdUserId })
+    ]);
+
+    const totalActivities = activities.length;
+    const completedActivities = activities.filter((a) => a.completed).length;
+    const incompleteActivities = totalActivities - completedActivities;
+    const lastHealthData = healthData.sort((a, b) => b.createdAt - a.createdAt)[0]; // most recent
+    const totalSchedules = schedules.reduce((count, sch) => count + (sch.events?.length || 0), 0);
+
+    res.json({
+      user,
+      activities,
+      schedules,
+      healthData,
+      reviews,
+      summary: {
+        totalActivities,
+        completedActivities,
+        incompleteActivities,
+        totalSchedules,
+        lastHealthData,
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error.message);
+    res.status(500).json({ message: "Server error fetching user details" });
+  }
+});
+
+
 // 📅 SCHEDULE MANAGEMENT
 router.get("/schedules", authMiddleware, adminMiddleware, async (req, res) => {
   const schedules = await Schedule.find();
@@ -128,6 +172,22 @@ router.delete("/activities/:id", authMiddleware, adminMiddleware, async (req, re
   await Activity.findByIdAndDelete(req.params.id);
   res.json({ message: "Activity deleted" });
 });
+
+// Update an activity
+router.patch("/activities/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const activity = await Activity.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!activity) return res.status(404).json({ message: "Activity not found" });
+    res.json(activity);
+  } catch (err) {
+    res.status(500).json({ message: "Error updating activity" });
+  }
+});
+
 
 // New
 

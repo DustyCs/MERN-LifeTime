@@ -75,9 +75,10 @@ export default function AdminUsers() {
         <ul>
           {filteredUsers.map((user: any) => (
               <li key={user._id}>
-                {user.name} - {user.email} - {user.isAdmin ? "Admin" : "User"}
+                {user._id} - {user.name} - {user.email} - {user.isAdmin ? "Admin" : "User"}
                 <button onClick={() => handleToggleAdmin(user._id)}>{user.isAdmin ? "Remove Admin" : "Make Admin" }</button>
                 <button onClick={() => handleDelete(user._id)}>Delete</button>
+                <button onClick={() => window.location.href = `/admin/users/${user._id}/details`}>User Details</button>
               </li>
             ))
           }
@@ -94,3 +95,7 @@ export default function AdminUsers() {
     </div>
   );
 }
+
+// TODO
+// FOCUS ON FRONTEND FIRST
+// THEN CREATE THE BACKEND ROUTES

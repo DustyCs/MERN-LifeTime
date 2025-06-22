@@ -19,6 +19,7 @@ import AdminUsers from "./feature/admin/pages/AdminUsers";
 import AdminSchedules from "./feature/admin/pages/AdminSchedules";
 import AdminActivities from "./feature/admin/pages/AdminActivities";
 import AdminQueries from "./feature/admin/pages/AdminQueries";
+import AdminUserDetail from "./feature/admin/pages/AdminUserDetails";
 
 // App Routes shouldn't have been here and instead in its own file
 
@@ -42,6 +43,7 @@ function App() {
             <Route element={ <RequireAdmin /> }>
               <Route path="/admin" element={<AdminOverview />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/users/:id/details" element={<AdminUserDetail />} />
               <Route path="/admin/schedules" element={<AdminSchedules />} />
               <Route path="/admin/activities" element={<AdminActivities />} />
               <Route path="/admin/queries" element={<AdminQueries />} />
