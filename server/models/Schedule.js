@@ -19,6 +19,9 @@ const ScheduleSchema = new mongoose.Schema({
   ]
 });
 
+// isn't this inefficient?
+
+
 module.exports = mongoose.model("Schedule", ScheduleSchema);
 
 // old

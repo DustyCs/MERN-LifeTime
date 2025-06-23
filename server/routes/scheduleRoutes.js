@@ -145,11 +145,24 @@ router.get("/", authMiddleware, async (req, res) => {
         console.log("Old Format Schedules:", JSON.stringify(oldFormatSchedules, null, 2));
 
         // Extract all events from old format
+        // const oldFormatEvents = oldFormatSchedules.flatMap(schedule =>
+        //     schedule.events.map(event => ({
+        //         ...event.toObject(),
+        //         year: schedule.year,
+        //         month: schedule.month
+        //     }))
+        // );
+
         const oldFormatEvents = oldFormatSchedules.flatMap(schedule =>
             schedule.events.map(event => ({
-                ...event,
+                _id: event._id,
+                title: event.title,
+                description: event.description,
+                date: event.date,
+                category: event.category,
+                day: event.day,
                 year: schedule.year,
-                month: schedule.month
+                month: schedule.month,
             }))
         );
 
@@ -160,7 +173,9 @@ router.get("/", authMiddleware, async (req, res) => {
                 title: sch.title,
                 description: sch.description,
                 date: sch.date,
-                category: sch.category
+                category: sch.category,
+                year: sch.year,
+                month: sch.month,
             })),
             ...oldFormatEvents
         ];

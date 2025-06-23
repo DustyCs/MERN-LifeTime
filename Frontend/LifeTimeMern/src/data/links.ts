@@ -4,6 +4,7 @@ export type NavLink = {
     onClick?: () => void;
     showIfLoggedIn?: boolean;
     showIfLoggedOut?: boolean;
+    showIfAdmin?: boolean;
 };
 
 const getCurrentMonth = () => {
@@ -47,6 +48,12 @@ export const Links: NavLink[] = [
         name: "Register/Login",
         path: "/access",
         showIfLoggedOut: true
+    },
+    {
+        name: "Admin",
+        path: "/admin",
+        showIfLoggedIn: true,
+        showIfAdmin: true
     },
     {
         name: "Logout",

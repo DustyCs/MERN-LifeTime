@@ -56,7 +56,7 @@ router.post('/login', [
 
         res.json({ 
             token, 
-            user: { name: user.name, email: user.email } 
+            user: { name: user.name, email: user.email, isAdmin: user.isAdmin } 
         });
     } catch (error) {
         console.error(error);
